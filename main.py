@@ -18,4 +18,6 @@ async def on_ready():
 
 
 dave.load_extension("commands")
+dave.load_extension("listeners")
+
 dave.run(os.getenv("BOT_TOKEN"))
