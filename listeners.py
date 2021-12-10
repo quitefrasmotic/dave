@@ -1,6 +1,5 @@
 import nextcord
 from nextcord.ext import commands
-from nextcord.ext.commands import context
 
 
 @commands.Cog.listener()
