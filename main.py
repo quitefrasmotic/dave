@@ -5,9 +5,10 @@ import os
 from nextcord.ext import commands
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
-intents = nextcord.Intents.default()
+intents = nextcord.Intents.all()
 activity = nextcord.Streaming(name="the singularity", url="https://www.youtube.com/watch?v=iik25wqIuFo")
 dave = commands.Bot(command_prefix=",", intents=intents, activity=activity)
 
