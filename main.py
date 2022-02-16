@@ -22,7 +22,6 @@ async def on_ready():
     print('Dave Prime activated')
     print(str(dave.user)+" | "+str(dave.user.id))
 
-    dave.load_extension("commands")
     dave.load_extension("listeners")
 
 
@@ -39,4 +38,5 @@ async def reload_extension(interaction,
         await interaction.response.send_message("hey what the fuck is your name daupaloffer? i didn't think so")
 
 
+dave.load_extension("commands")
 dave.run(os.getenv("BOT_TOKEN"))
