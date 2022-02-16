@@ -1,5 +1,4 @@
 import nextcord
-import json
 import os
 
 from nextcord.ext import commands
