@@ -3,10 +3,7 @@ import datetime
 import os
 
 from time import mktime
-from nextcord.activity import Streaming
 from nextcord.ext import commands
-from nextcord.ext.commands import context
-from nextcord.types.activity import ActivityType
 
 
 @commands.Cog.listener()
