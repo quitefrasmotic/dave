@@ -19,11 +19,8 @@ async def on_ready():
 
 
 @dave.slash_command(name="module-reload", description="Reload a Dave module", guild_ids=guilds)
-async def reload_extension(interaction: nextcord.Interaction, extension: str = nextcord.SlashOption(
-                            name="module", 
-                            description="Specified module to reload", 
-                            choices={"Commands Module": "commands"},
-                            required=True)):
+async def reload_extension(interaction, 
+                           extension: str = nextcord.SlashOption(name="module", description="Specified module to reload", choices={"Commands Module": "commands"}, required=True)):
     if interaction.user.id == 191634797897056265:
         print(f"Reloading extension: {extension}..")
         dave.reload_extension(f"{extension}")
