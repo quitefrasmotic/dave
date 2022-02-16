@@ -1,14 +1,20 @@
 import nextcord
 import os
+import random
 
 from nextcord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
+with open("activitylinks", "r") as f:
+    links = f.readlines()
+    activity_link = random.choice(links)
+    print(activity_link)
+    f.close()
 
 guilds = [583429823125258303,915057672515108935]
 intents = nextcord.Intents.all()
-activity = nextcord.Streaming(name="the singularity", url="https://www.youtube.com/watch?v=iik25wqIuFo")
+activity = nextcord.Streaming(name="the singularity", url=activity_link)
 dave = commands.Bot(command_prefix=",", intents=intents, activity=activity)
 
 
