@@ -30,7 +30,7 @@ class Commands(commands.Cog):
         if message:
             owo_payload = message
         else:
-            owo_payload = (await interaction.channel.history(limit=2).flatten())[0]
+            owo_payload = (await interaction.channel.history(limit=1).flatten())[0]
             if not owo_payload.content:  # Maybe add owo_payload.author.bot too
                 await interaction.response.send_message("try again, idiot")
                 return
