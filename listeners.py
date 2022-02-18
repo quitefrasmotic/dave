@@ -4,8 +4,15 @@ import os
 
 from time import mktime
 from nextcord.ext import commands
+from main import dave
 
 currently_streaming = []
+
+
+admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
+if not admin_channel_id:
+    print("Please provide an admin channel snowflake in your .env!")
+    raise SystemExit
 
 
 @commands.Cog.listener()
@@ -69,9 +76,11 @@ async def timeout_watcher(before, after):
         timeout_embed = nextcord.Embed(title=f":timer: Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
                                        color=nextcord.Colour.from_rgb(255,171,246),
                                        description=description)
-
         timeout_embed.set_thumbnail(url=after.display_avatar.url)
-        await admin_channel.send(embed=timeout_embed)
+        
+        admin_channel = dave.get_channel(admin_channel_id)
+        if isinstance(admin_channel, nextcord.TextChannel):
+            await admin_channel.send(embed=timeout_embed)
 
 
 @commands.Cog.listener()
@@ -79,9 +88,11 @@ async def ban_watcher(guild, user):
     ban_embed = nextcord.Embed(title=f":hammer: Moderation Alert - BAN - {user.name}#{user.discriminator}",
                                color=nextcord.Colour.from_rgb(255,171,246),
                                description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*")
-    
     ban_embed.set_thumbnail(url=user.display_avatar.url)
-    await admin_channel.send(embed=ban_embed)
+    
+    admin_channel = dave.get_channel(admin_channel_id)
+    if isinstance(admin_channel, nextcord.TextChannel):
+        await admin_channel.send(embed=ban_embed)
 
 
 @commands.Cog.listener()
@@ -89,24 +100,18 @@ async def unban_watcher(guild, user):
     unban_embed = nextcord.Embed(title=f":tada: Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
                                  color=nextcord.Colour.from_rgb(255,171,246),
                                  description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*")
-    
     unban_embed.set_thumbnail(url=user.display_avatar.url)
-    await admin_channel.send(embed=unban_embed)
+
+    admin_channel = dave.get_channel(admin_channel_id)
+    if isinstance(admin_channel, nextcord.TextChannel):
+        await admin_channel.send(embed=unban_embed)
 
 
 def setup(dave):
-    admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
-    if admin_channel_id:
-        global admin_channel
-        admin_channel = dave.get_channel(admin_channel_id)
-    else:
-        print("Please provide an admin channel snowflake in your .env!")
-        raise SystemExit
-    
     dave.add_listener(listeny, "on_message")
     dave.add_listener(streamerboost, "on_presence_update")
     dave.add_listener(timeout_watcher, "on_member_update")
     dave.add_listener(ban_watcher, "on_member_ban")
     dave.add_listener(unban_watcher, "on_member_unban")
-
+    
     #streamerboost_cleanup(dave)
