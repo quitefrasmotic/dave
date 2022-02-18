@@ -13,13 +13,13 @@ class ModuleCommands(commands.Cog):
     async def reload_extension(
         self,
         interaction,
-        extension: str = nextcord.SlashOption( # type: ignore - tell linter to stop complaining about the str-SlashOption type error - think it's because of nextcord's implementation?
+        extension: str = nextcord.SlashOption(  # type: ignore - tell linter to stop complaining about the str-SlashOption type error - think it's because of nextcord's implementation?
             name="module",
             description="Specified module to reload",
             choices={"Commands Module": "commands"},
             required=True,
-        )
-    ):  
+        ),
+    ):
 
         if interaction.user.id == 191634797897056265:
             print(f"Reloading extension: {extension}..")
