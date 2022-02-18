@@ -20,7 +20,7 @@ dave = commands.Bot(command_prefix=",", intents=intents, activity=activity)
 @dave.event
 async def on_ready():
     print('Dave Prime activated')
-    print(str(dave.user)+" | "+str(dave.user.id))
+    print(str(dave.user)+" | "+str(dave.application_id))
     dave.load_extension("listeners")
 
 
