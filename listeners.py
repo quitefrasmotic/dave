@@ -87,7 +87,7 @@ async def timeout_watcher(before, after):
 
         # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
         timeout_embed = nextcord.Embed(
-            title=f":timer: Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
+            title=f"Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
             color=nextcord.Colour.from_rgb(255, 171, 246),
             description=description,
         )
@@ -101,7 +101,7 @@ async def timeout_watcher(before, after):
 @commands.Cog.listener()
 async def ban_watcher(guild, user):
     ban_embed = nextcord.Embed(
-        title=f":hammer: Moderation Alert - BAN - {user.name}#{user.discriminator}",
+        title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
         color=nextcord.Colour.from_rgb(255, 171, 246),
         description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
     )
@@ -115,7 +115,7 @@ async def ban_watcher(guild, user):
 @commands.Cog.listener()
 async def unban_watcher(guild, user):
     unban_embed = nextcord.Embed(
-        title=f":tada: Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
+        title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
         color=nextcord.Colour.from_rgb(255, 171, 246),
         description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
     )
