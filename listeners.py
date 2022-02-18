@@ -5,6 +5,8 @@ import os
 from time import mktime
 from nextcord.ext import commands
 
+currently_streaming = []
+
 
 @commands.Cog.listener()
 async def listeny(ctx):
@@ -14,28 +16,47 @@ async def listeny(ctx):
 
 @commands.Cog.listener()
 async def streamerboost(before, after):
-    # Sometimes they don't have an activity, so only do this if they do
-    try:
-        if after.activity:
-            if after.activity.type == nextcord.ActivityType.streaming and before.activity.type != nextcord.ActivityType.streaming:
-                print(str(after.name)+" is streaming")
-                print(str(after.activity.details))
-                if after.guild == 915057672515108935:
-                    await after.add_roles([943381405801533471], reason="Member started streaming")
-    except AttributeError:
-        print(after + "NoneType on after")
-        pass
+    '''for i in range(len(after.activities)):
+        if after.activities[i].type == nextcord.ActivityType.streaming:
+            print("FOUND IT")'''
     
-    try:
-        if before.activity:
-            if before.activity.type == nextcord.ActivityType.streaming and after.activity.type != nextcord.ActivityType.streaming:
-                print(str(before.name)+" is no longer streaming")
-                print(str(after.activity.details))
-                if before.guild == 915057672515108935:
-                    await before.remove_roles([943381405801533471], reason="Member stopped streaming")
-    except AttributeError:
-        print(before + "NoneType on before")
-        pass
+    # If the member is now streaming
+    if any(isinstance(i, nextcord.Streaming) for i in after.activities):
+        streaming_before = any(isinstance(i, nextcord.Streaming) for i in before.activities)
+
+        if not streaming_before:
+            print(str(after.name)+" is streaming")
+            print("before: "+str(before.activities)+" after: "+str(after.activities))
+
+            if any(isinstance(i, nextcord.Streaming) for i in before.activities):
+                print("nevermind they were already streamin")
+            
+            if after.id == 915057672515108935:
+                await after.add_roles([943381405801533471], reason="Member started streaming")
+                currently_streaming.append(after.id)
+
+    # If the member is no longer streaming
+    if any(isinstance(i, nextcord.Streaming) for i in before.activities):
+        streaming_after = any(isinstance(i, nextcord.Streaming) for i in after.activities)
+
+        if not streaming_after:
+            print(str(before.name)+" is no longer streaming")
+            print("before: "+str(before.activities)+" after: "+str(after.activities))
+            
+            if any(isinstance(i, nextcord.Streaming) for i in after.activities):
+                print("nevermind they still streamin")
+            
+            if before.id == 915057672515108935:
+                await before.remove_roles([943381405801533471], reason="Member stopped streaming")
+                currently_streaming.remove(before.id)
+
+'''async def streamerboost_cleanup(dave):
+    if currently_streaming:
+        for i in range(len(currently_streaming)-1, -1, -1): # Count backwards to stop it from getting confused if a list element is popped
+            member = dave.get_member(currently_streaming[i])
+            if member.activity.type != nextcord.ActivityType.streaming:
+                currently_streaming.pop(i)
+                await member.remove_roles([943381405801533471], reason="Removed by cleanup")'''
 
 
 @commands.Cog.listener()
@@ -74,11 +95,18 @@ async def unban_watcher(guild, user):
 
 
 def setup(dave):
-    global admin_channel
-    admin_channel = dave.get_channel(int(os.getenv("ADMIN_CHANNEL")))
+    admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
+    if admin_channel_id:
+        global admin_channel
+        admin_channel = dave.get_channel(admin_channel_id)
+    else:
+        print("Please provide an admin channel snowflake in your .env!")
+        raise SystemExit
     
     dave.add_listener(listeny, "on_message")
     dave.add_listener(streamerboost, "on_presence_update")
     dave.add_listener(timeout_watcher, "on_member_update")
     dave.add_listener(ban_watcher, "on_member_ban")
     dave.add_listener(unban_watcher, "on_member_unban")
+
+    #streamerboost_cleanup(dave)
