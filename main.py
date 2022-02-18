@@ -39,4 +39,9 @@ async def reload_extension(interaction,
 
 
 dave.load_extension("commands")
-dave.run(os.getenv("BOT_TOKEN"))
+bot_token = str(os.getenv("BOT_TOKEN", ""))
+if bot_token:
+    dave.run(bot_token)
+else:
+    print("Please provide a bot token in your .env!")
+    raise SystemExit
