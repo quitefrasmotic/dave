@@ -80,7 +80,7 @@ async def streamerboost(before, after):
 
 
 @commands.Cog.listener()
-async def timeout_watcher(before, after):
+async def timeout_watcher(after):
     if after.timeout:
         description = f"**{after.mention} was just TIMED OUT until <t:{int(mktime(after.timeout.timetuple()))}:f>** \
                         \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*"
@@ -99,7 +99,7 @@ async def timeout_watcher(before, after):
 
 
 @commands.Cog.listener()
-async def ban_watcher(guild, user):
+async def ban_watcher(user):
     ban_embed = nextcord.Embed(
         title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
         color=nextcord.Colour.from_rgb(255, 171, 246),
@@ -113,7 +113,7 @@ async def ban_watcher(guild, user):
 
 
 @commands.Cog.listener()
-async def unban_watcher(guild, user):
+async def unban_watcher(user):
     unban_embed = nextcord.Embed(
         title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
         color=nextcord.Colour.from_rgb(255, 171, 246),
