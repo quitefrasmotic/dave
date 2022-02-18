@@ -1,12 +1,13 @@
 import nextcord
 from nextcord.ext import commands
+from main import guild_ids
 
 
-class slash_commands(commands.Cog):
+class ModuleCommands(commands.Cog):
     def __init__(self, dave):
         self.dave = dave
     
-    @nextcord.slash_command(name="module-reload", description="Reload a Dave module", guild_ids=self.dave.guild_ids)
+    @nextcord.slash_command(name="module-reload", description="Reload a Dave module", guild_ids=guild_ids)
     async def reload_extension(self, interaction, 
                             extension: str = nextcord.SlashOption(name="module", description="Specified module to reload", choices={"Commands Module": "commands"}, required=True)):
         
@@ -20,4 +21,4 @@ class slash_commands(commands.Cog):
 
 
 def setup(dave):
-    dave.add_cog(slash_commands(dave))
+    dave.add_cog(ModuleCommands(dave))
