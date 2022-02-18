@@ -9,7 +9,7 @@ class ModuleCommands(commands.Cog):
     
     @nextcord.slash_command(name="module-reload", description="Reload a Dave module", guild_ids=guild_ids)
     async def reload_extension(self, interaction, 
-                            extension: str = nextcord.SlashOption(name="module", description="Specified module to reload", choices={"Commands Module": "commands"}, required=True)):
+                            extension: str = nextcord.SlashOption(name="module", description="Specified module to reload", choices={"Commands Module": "commands"}, required=True)): # type: ignore - tell linter to stop complaining about the str-SlashOption type error - think it's because of nextcord's implementation?
         
         if interaction.user.id == 191634797897056265:
             print(f"Reloading extension: {extension}..")

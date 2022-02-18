@@ -14,8 +14,8 @@ class Commands(commands.Cog):
     @nextcord.slash_command(name="owo", description="owo-ify", guild_ids=guild_ids)
     async def owoifier(self, 
                        interaction, 
-                       message: str = nextcord.SlashOption(name="message", description="owo-ify provided message instead of previous message", required=False), 
-                       anonymous: bool = nextcord.SlashOption(name="anonymous", description="Make it look like it was Dave Prime who sent the message", required=False)):
+                       message: str = nextcord.SlashOption(name="message", description="owo-ify provided message instead of previous message", required=False), # type: ignore - refer to comment in same place in module-commands for explanation
+                       anonymous: bool = nextcord.SlashOption(name="anonymous", description="Make it look like it was Dave Prime who sent the message", required=False)): # type: ignore
 
         if message: owo_payload = message
         else:
