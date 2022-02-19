@@ -26,6 +26,7 @@ async def on_ready():
 dave.load_extension("commands")
 dave.load_extension("listeners")
 dave.load_extension("module-commands")
+dave.load_extension("choccy-stock")
 
 bot_token = str(os.getenv("BOT_TOKEN", ""))
 if bot_token:

@@ -25,7 +25,7 @@ class Commands(commands.Cog):
             description="Make it look like it was Dave Prime who sent the message",
             required=False,
         ),
-    ):  # type: ignore
+    ):
 
         if message:
             owo_payload = message
