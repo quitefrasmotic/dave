@@ -48,7 +48,7 @@ async def streamerboost(before, after):
                 print("nevermind they were already streamin")
 
             streamer_role = after.guild.get_role(943381405801533471)
-            
+
             if streamer_role not in after.roles:
                 try:
                     await after.add_roles(
@@ -74,7 +74,7 @@ async def streamerboost(before, after):
                 print("nevermind they still streamin")
 
             streamer_role = before.guild.get_role(943381405801533471)
-            
+
             if streamer_role in before.roles:
                 try:
                     await before.remove_roles(
@@ -87,31 +87,37 @@ async def streamerboost(before, after):
 
 async def streamerboost_sanity(dave):
     """if currently_streaming:
-        for i in range(len(currently_streaming)-1, -1, -1): # Count backwards to stop it from getting confused if a list element is popped
-            member = dave.get_member(currently_streaming[i])
-            if member.activity.type != nextcord.ActivityType.streaming:
-                currently_streaming.pop(i)
-                await member.remove_roles([943381405801533471], reason="Removed by cleanup")"""
+    for i in range(len(currently_streaming)-1, -1, -1): # Count backwards to stop it from getting confused if a list element is popped
+        member = dave.get_member(currently_streaming[i])
+        if member.activity.type != nextcord.ActivityType.streaming:
+            currently_streaming.pop(i)
+            await member.remove_roles([943381405801533471], reason="Removed by cleanup")"""
     main_guild = ""
     for i in range(len(dave.guilds)):
         if dave.guilds[i].name == "The Waifu Corner":
             main_guild = dave.guilds[i]
     if main_guild == "":
         raise SystemExit
-    
+
     streamer_role = main_guild.get_role(943381405801533471)
 
     for h in range(len(main_guild.humans)):
-        if any(isinstance(i, nextcord.Streaming) for i in main_guild.humans[h].activities):
+        if any(
+            isinstance(i, nextcord.Streaming) for i in main_guild.humans[h].activities
+        ):
             if streamer_role not in main_guild.humans[h].roles:
                 try:
-                    await main_guild.humans[h].add_roles(streamer_role, reason = "Member is streaming")
+                    await main_guild.humans[h].add_roles(
+                        streamer_role, reason="Member is streaming"
+                    )
                 except nextcord.errors.Forbidden:
                     print(role_forbidden_message)
         else:
             if streamer_role in main_guild.humans[h].roles:
                 try:
-                    await main_guild.humans[h].remove_roles(streamer_role, reason = "Member is not streaming")
+                    await main_guild.humans[h].remove_roles(
+                        streamer_role, reason="Member is not streaming"
+                    )
                 except nextcord.errors.Forbidden:
                     print(role_forbidden_message)
 
@@ -170,4 +176,3 @@ def setup(dave):
     dave.add_listener(ban_watcher, "on_member_ban")
     dave.add_listener(unban_watcher, "on_member_unban")
     dave.add_listener(on_ready, "on_ready")
-
