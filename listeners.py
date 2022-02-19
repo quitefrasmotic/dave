@@ -47,17 +47,16 @@ async def streamerboost(before, after):
             if any(isinstance(i, nextcord.Streaming) for i in before.activities):
                 print("nevermind they were already streamin")
 
-            if after.id == 160135409731502080:
-                streamer_role = after.guild.get_role(943381405801533471)
-                
-                if streamer_role not in after.roles:
-                    try:
-                        await after.add_roles(
-                            streamer_role, reason="Member started streaming"
-                        )
-                    except nextcord.errors.Forbidden:
-                        print(role_forbidden_message)
-                    currently_streaming.append(after.id)
+            streamer_role = after.guild.get_role(943381405801533471)
+            
+            if streamer_role not in after.roles:
+                try:
+                    await after.add_roles(
+                        streamer_role, reason="Member started streaming"
+                    )
+                except nextcord.errors.Forbidden:
+                    print(role_forbidden_message)
+                currently_streaming.append(after.id)
 
     # If the member is no longer streaming
     if any(isinstance(i, nextcord.Streaming) for i in before.activities):
@@ -74,17 +73,16 @@ async def streamerboost(before, after):
             if any(isinstance(i, nextcord.Streaming) for i in after.activities):
                 print("nevermind they still streamin")
 
-            if before.id == 160135409731502080:
-                streamer_role = before.guild.get_role(943381405801533471)
-                
-                if streamer_role in before.roles:
-                    try:
-                        await before.remove_roles(
-                            streamer_role, reason="Member stopped streaming"
-                        )
-                    except nextcord.errors.Forbidden:
-                        print(role_forbidden_message)
-                    currently_streaming.remove(before.id)
+            streamer_role = before.guild.get_role(943381405801533471)
+            
+            if streamer_role in before.roles:
+                try:
+                    await before.remove_roles(
+                        streamer_role, reason="Member stopped streaming"
+                    )
+                except nextcord.errors.Forbidden:
+                    print(role_forbidden_message)
+                currently_streaming.remove(before.id)
 
 
 async def streamerboost_sanity(dave):
