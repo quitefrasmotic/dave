@@ -7,12 +7,17 @@ from nextcord.ext import commands
 from main import dave
 
 currently_streaming = []
-
+role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
 
 admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
 if not admin_channel_id:
     print("Please provide an admin channel snowflake in your .env!")
     raise SystemExit
+
+
+@commands.Cog.listener()
+async def on_ready():
+    await streamerboost_sanity(dave)
 
 
 @commands.Cog.listener()
@@ -51,7 +56,7 @@ async def streamerboost(before, after):
                             streamer_role, reason="Member started streaming"
                         )
                     except nextcord.errors.Forbidden:
-                        print("Bot doesn't have permission to update roles for this user! Maybe they're higher rank?")
+                        print(role_forbidden_message)
                     currently_streaming.append(after.id)
 
     # If the member is no longer streaming
@@ -78,17 +83,39 @@ async def streamerboost(before, after):
                             streamer_role, reason="Member stopped streaming"
                         )
                     except nextcord.errors.Forbidden:
-                        print("Bot doesn't have permission to update roles for this user! Maybe they're higher rank?")
+                        print(role_forbidden_message)
                     currently_streaming.remove(before.id)
 
 
-"""async def streamerboost_cleanup(dave):
-    if currently_streaming:
+async def streamerboost_sanity(dave):
+    """if currently_streaming:
         for i in range(len(currently_streaming)-1, -1, -1): # Count backwards to stop it from getting confused if a list element is popped
             member = dave.get_member(currently_streaming[i])
             if member.activity.type != nextcord.ActivityType.streaming:
                 currently_streaming.pop(i)
                 await member.remove_roles([943381405801533471], reason="Removed by cleanup")"""
+    main_guild = ""
+    for i in range(len(dave.guilds)):
+        if dave.guilds[i].name == "The Waifu Corner":
+            main_guild = dave.guilds[i]
+    if main_guild == "":
+        raise SystemExit
+    
+    streamer_role = main_guild.get_role(943381405801533471)
+
+    for h in range(len(main_guild.humans)):
+        if any(isinstance(i, nextcord.Streaming) for i in main_guild.humans[h].activities):
+            if streamer_role not in main_guild.humans[h].roles:
+                try:
+                    await main_guild.humans[h].add_roles(streamer_role, reason = "Member is streaming")
+                except nextcord.errors.Forbidden:
+                    print(role_forbidden_message)
+        else:
+            if streamer_role in main_guild.humans[h].roles:
+                try:
+                    await main_guild.humans[h].remove_roles(streamer_role, reason = "Member is not streaming")
+                except nextcord.errors.Forbidden:
+                    print(role_forbidden_message)
 
 
 @commands.Cog.listener()
@@ -144,5 +171,5 @@ def setup(dave):
     dave.add_listener(timeout_watcher, "on_member_update")
     dave.add_listener(ban_watcher, "on_member_ban")
     dave.add_listener(unban_watcher, "on_member_unban")
+    dave.add_listener(on_ready, "on_ready")
 
-    # streamerboost_cleanup(dave)
