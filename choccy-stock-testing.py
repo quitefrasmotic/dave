@@ -1,3 +1,8 @@
+###### NOTE ######
+## This is entirely just me experimenting around with concepts right now and is      ##
+## nowhere near to a final implementation - actually getting code down and iterating ##
+## on it helps me to brainstorm solutions to complex (to me) problems such as this   ##
+
 import math
 import datetime
 
