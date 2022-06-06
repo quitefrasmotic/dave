@@ -11,9 +11,9 @@ class BasicCommands(commands.Cog):
     async def testcommand(self, interaction: discord.Interaction):
         await interaction.response.send_message("idiot")
 
-    @app_commands.command(name="owo", description="owo-ify")
+    @app_commands.command(name="owo", description="owo-ify your message")
     @app_commands.describe(
-        message="owo-ify provided message instead of previous message",
+        message="Provide a message to be owo-ified instead of using previous message",
         anonymous="Make it look like it was Dave Prime who sent the message",
     )
     async def owoifier(
