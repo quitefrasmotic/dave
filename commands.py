@@ -1,36 +1,33 @@
-import nextcord
-from nextcord.ext import commands
-from main import guild_ids
+import discord
+from discord import app_commands
+from discord.ext import commands
 
 
-class Commands(commands.Cog):
-    def __init__(self, dave):
-        self.dave = dave
+class BasicCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    @nextcord.slash_command(guild_ids=guild_ids)
-    async def testcommand(self, interaction):
+    @app_commands.command(name="test_command", description="This is a test command")
+    async def testcommand(self, interaction: discord.Interaction):
         await interaction.response.send_message("idiot")
 
-    @nextcord.slash_command(name="owo", description="owo-ify", guild_ids=guild_ids)
+    @app_commands.command(name="owo", description="owo-ify")
+    @app_commands.describe(
+        message="owo-ify provided message instead of previous message",
+        anonymous="Make it look like it was Dave Prime who sent the message",
+    )
     async def owoifier(
         self,
-        interaction,
-        message: str = nextcord.SlashOption(  # type: ignore - refer to comment in same place in module-commands for explanation
-            name="message",
-            description="owo-ify provided message instead of previous message",
-            required=False,
-        ),
-        anonymous: bool = nextcord.SlashOption(  # type: ignore
-            name="anonymous",
-            description="Make it look like it was Dave Prime who sent the message",
-            required=False,
-        ),
+        interaction: discord.Interaction,
+        message: str = "",
+        anonymous: bool = False,
     ):
-
         if message:
             owo_payload = message
         else:
-            owo_payload = (await interaction.channel.history(limit=1).flatten())[0]
+            message_history = interaction.channel.history(limit=1)  # type: ignore
+            owo_payload = [message async for message in message_history][0]
+
             if not owo_payload.content:  # Maybe add owo_payload.author.bot too
                 await interaction.response.send_message("try again, idiot")
                 return
@@ -45,11 +42,12 @@ class Commands(commands.Cog):
                 owo_payload = owo_payload.replace(i, "W")
 
         if anonymous:
-            await interaction.channel.send(owo_payload)
+            await interaction.channel.send(owo_payload)  # type: ignore
             await interaction.response.send_message("Message sent!", ephemeral=True)
         else:
             await interaction.response.send_message(owo_payload)
 
 
-def setup(dave):
-    dave.add_cog(Commands(dave))
+async def setup(bot):
+    print("Loading commands extension..")
+    await bot.add_cog(BasicCommands(bot))
