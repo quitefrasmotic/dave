@@ -20,7 +20,7 @@ class DaveBot(commands.Bot):
     async def setup_hook(self):
         await self.load_extension("commands")
         # await self.load_extension("listeners")
-        # await self.load_extension("module-commands")
+        await self.load_extension("module-management")
         # await self.load_extension("choccy-stock")
 
         self.tree.copy_global_to(guild=test_guild)
@@ -46,7 +46,7 @@ bot = DaveBot(command_prefix=command_prefix, intents=intents, activity=activity)
 @bot.event
 async def on_ready():
     print("Dave Prime activated")
-    print(f"{bot.user} | {bot.application_id}")
+    print(f"{bot.user} | {bot.application_id}\n")
 
 
 bot_token = str(os.getenv("BOT_TOKEN", ""))

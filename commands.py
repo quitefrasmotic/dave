@@ -7,7 +7,7 @@ class BasicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="test_command", description="This is a test command")
+    @app_commands.command(name="test-command", description="This is a test command")
     async def testcommand(self, interaction: discord.Interaction):
         await interaction.response.send_message("idiot")
 
