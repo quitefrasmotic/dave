@@ -117,8 +117,10 @@ class ModerationWatcher(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.is_timed_out() and not before.is_timed_out():
-            description = f"{after.mention} was just timed out until <t:{int(after.timed_out_until.timestamp())}:f> \
-                            \nOccurred <t:{int(time.time())}:f>"
+            timeout_until_unix = int(after.timed_out_until.timestamp())  # type: ignore
+            now_unix = int(time.time())
+            description = f"{after.mention} was just timed out until <t:{timeout_until_unix}:f> \
+                            \nOccurred <t:{now_unix}:f>"
 
             # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
             timeout_embed = discord.Embed(
