@@ -18,11 +18,11 @@ class DaveBot(commands.Bot):
         )
 
     async def setup_hook(self):
-        await self.load_extension("commands")
-        await self.load_extension("listeners")
         await self.load_extension("module-management")
-        await self.load_extension("moderation-watcher")
-        await self.load_extension("streamer-boost")
+        await self.load_extension("extensions.commands")
+        await self.load_extension("extensions.listeners")
+        await self.load_extension("extensions.moderation-watcher")
+        await self.load_extension("extensions.streamer-boost")
         # await self.load_extension("choccy-stock")
 
         self.tree.copy_global_to(guild=test_guild)
