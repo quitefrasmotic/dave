@@ -22,9 +22,12 @@ All commands in this bot use Discord's slash-commands. Type a "/" in chat and se
     
     ```
     BOT_TOKEN=""
-    ADMIN_CHANNEL=""
+    ADMIN_CHANNEL="" # ID (Snowflake)
+    MAIN_GUILD=""    # ID (Snowflake)
+    TEST_GUILD=""    # ID (Snowflake)
+    TEST_ENV=""      # true/false
     ```
-    
+
 3.  Fill the variables with the appropriate values - token in BOT\_TOKEN, admin channel snowflake in ADMIN\_CHANNEL
 4.  Run main.py
 5.  Go wild
