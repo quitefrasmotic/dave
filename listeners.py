@@ -1,8 +1,7 @@
 import discord
-import datetime
 import os
 
-from time import mktime
+import time
 from discord.ext import commands
 
 role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
@@ -117,9 +116,9 @@ class ModerationWatcher(commands.Cog):
     # Timeout watcher
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if after.is_timed_out():
-            description = f"**{after.mention} was just TIMED OUT until <t:{int(mktime(after.timed_out_until.timetuple()))}:f>** \
-                            \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*"
+        if after.is_timed_out() and not before.is_timed_out():
+            description = f"**{after.mention} was just TIMED OUT until <t:{int(after.timed_out_until.timestamp())}:f>** \
+                            \n*Occurred: <t:{int(time.time())}:f>*"
 
             # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
             timeout_embed = discord.Embed(
@@ -139,7 +138,7 @@ class ModerationWatcher(commands.Cog):
         ban_embed = discord.Embed(
             title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
             color=discord.Colour.from_rgb(255, 171, 246),
-            description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
+            description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(time.time())}:f>*",
         )
         ban_embed.set_thumbnail(url=user.display_avatar.url)
 
@@ -153,7 +152,7 @@ class ModerationWatcher(commands.Cog):
         unban_embed = discord.Embed(
             title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
             color=discord.Colour.from_rgb(255, 171, 246),
-            description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
+            description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(time.time())}:f>*",
         )
         unban_embed.set_thumbnail(url=user.display_avatar.url)
 
