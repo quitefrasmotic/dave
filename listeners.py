@@ -1,10 +1,9 @@
-import nextcord
+import discord
 import datetime
 import os
 
 from time import mktime
-from nextcord.ext import commands
-from main import dave
+from discord.ext import commands
 
 role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
 
@@ -15,151 +14,156 @@ if not admin_channel_id:
 
 
 @commands.Cog.listener()
-async def on_ready():
-    await streamerboost_sanity(dave)
-
-
-@commands.Cog.listener()
 async def listeny(ctx):
     if str(ctx.content) == "hey" and not ctx.author.bot:
         await ctx.channel.send("hey")
 
 
-@commands.Cog.listener()
-async def streamerboost(before, after):
-    # If the member is now streaming
-    if any(isinstance(i, nextcord.Streaming) for i in after.activities):
-        streaming_before = any(
-            isinstance(i, nextcord.Streaming) for i in before.activities
-        )
+class StreamerBoost(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-        if not streaming_before:
-            print(str(after.name) + " is streaming")
-            print(
-                "before: " + str(before.activities) + " after: " + str(after.activities)
+    @commands.Cog.listener()
+    async def on_presence_update(self, before: discord.Member, after: discord.Member):
+        # If the member is now streaming
+        if any(isinstance(i, discord.Streaming) for i in after.activities):
+            streaming_before = any(
+                isinstance(i, discord.Streaming) for i in before.activities
             )
 
-            if any(isinstance(i, nextcord.Streaming) for i in before.activities):
-                print("nevermind they were already streamin")
+            if not streaming_before:
+                print(f"{after.name} is streaming")
+                print(f"before: {before.activities}\nafter: {after.activities}")
 
-            streamer_role = after.guild.get_role(943381405801533471)
+                if any(isinstance(i, discord.Streaming) for i in before.activities):
+                    print("nevermind they were already streamin")
 
-            if streamer_role not in after.roles:
-                try:
-                    await after.add_roles(
-                        streamer_role, reason="Member started streaming"
-                    )
-                except nextcord.errors.Forbidden:
-                    print(role_forbidden_message)
+                streamer_role = discord.Object(
+                    943381405801533471
+                )  # Stop hardcoding this - store in a better way
 
-    # If the member is no longer streaming
-    if any(isinstance(i, nextcord.Streaming) for i in before.activities):
-        streaming_after = any(
-            isinstance(i, nextcord.Streaming) for i in after.activities
-        )
+                if streamer_role not in after.roles:
+                    try:
+                        await after.add_roles(
+                            streamer_role, reason="Member started streaming"
+                        )
+                    except discord.errors.Forbidden:
+                        print(role_forbidden_message)
 
-        if not streaming_after:
-            print(str(before.name) + " is no longer streaming")
-            print(
-                "before: " + str(before.activities) + " after: " + str(after.activities)
+        # If the member is no longer streaming
+        if any(isinstance(i, discord.Streaming) for i in before.activities):
+            streaming_after = any(
+                isinstance(i, discord.Streaming) for i in after.activities
             )
 
-            if any(isinstance(i, nextcord.Streaming) for i in after.activities):
-                print("nevermind they still streamin")
+            if not streaming_after:
+                print(f"{before.name} is no longer streaming")
+                print(f"before: {before.activities}\nafter: {after.activities}")
 
-            streamer_role = before.guild.get_role(943381405801533471)
+                if any(isinstance(i, discord.Streaming) for i in after.activities):
+                    print("nevermind they still streamin")
 
-            if streamer_role in before.roles:
-                try:
-                    await before.remove_roles(
-                        streamer_role, reason="Member stopped streaming"
-                    )
-                except nextcord.errors.Forbidden:
-                    print(role_forbidden_message)
+                streamer_role = discord.Object(943381405801533471)
+
+                if streamer_role in before.roles:
+                    try:
+                        await before.remove_roles(
+                            streamer_role, reason="Member stopped streaming"
+                        )
+                    except discord.errors.Forbidden:
+                        print(role_forbidden_message)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        await self.sanity()
+
+    async def sanity(self):
+        # This is awful and I will endeavour to improve this ASAP
+        main_guild = ""
+        for i in range(len(self.bot.guilds)):
+            if self.bot.guilds[i].name == "repository of stuff":
+                main_guild = self.bot.guilds[i]
+        if main_guild == "":
+            raise SystemExit
+
+        streamer_role = main_guild.get_role(943381405801533471)
+
+        for m in range(len(main_guild.members)):
+            if any(
+                isinstance(i, discord.Streaming)
+                for i in main_guild.members[m].activities
+            ):
+                if streamer_role not in main_guild.members[m].roles:
+                    try:
+                        await main_guild.members[m].add_roles(
+                            streamer_role, reason="Member is streaming"
+                        )
+                    except discord.errors.Forbidden:
+                        print(role_forbidden_message)
+            else:
+                if streamer_role in main_guild.members[m].roles:
+                    try:
+                        await main_guild.members[m].remove_roles(
+                            streamer_role, reason="Member is not streaming"
+                        )
+                    except discord.errors.Forbidden:
+                        print(role_forbidden_message)
 
 
-async def streamerboost_sanity(dave):
-    main_guild = ""
-    for i in range(len(dave.guilds)):
-        if dave.guilds[i].name == "The Waifu Corner":
-            main_guild = dave.guilds[i]
-    if main_guild == "":
-        raise SystemExit
+class ModerationWatcher(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    streamer_role = main_guild.get_role(943381405801533471)
+    # Timeout watcher
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if after.is_timed_out():
+            description = f"**{after.mention} was just TIMED OUT until <t:{int(mktime(after.timed_out_until.timetuple()))}:f>** \
+                            \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*"
 
-    for h in range(len(main_guild.humans)):
-        if any(
-            isinstance(i, nextcord.Streaming) for i in main_guild.humans[h].activities
-        ):
-            if streamer_role not in main_guild.humans[h].roles:
-                try:
-                    await main_guild.humans[h].add_roles(
-                        streamer_role, reason="Member is streaming"
-                    )
-                except nextcord.errors.Forbidden:
-                    print(role_forbidden_message)
-        else:
-            if streamer_role in main_guild.humans[h].roles:
-                try:
-                    await main_guild.humans[h].remove_roles(
-                        streamer_role, reason="Member is not streaming"
-                    )
-                except nextcord.errors.Forbidden:
-                    print(role_forbidden_message)
+            # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
+            timeout_embed = discord.Embed(
+                title=f"Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
+                color=discord.Colour.from_rgb(255, 171, 246),
+                description=description,
+            )
+            timeout_embed.set_thumbnail(url=after.display_avatar.url)
 
+            admin_channel = self.bot.get_channel(admin_channel_id)
+            if isinstance(admin_channel, discord.TextChannel):
+                await admin_channel.send(embed=timeout_embed)
 
-@commands.Cog.listener()
-async def timeout_watcher(before, after):
-    if after.timeout:
-        description = f"**{after.mention} was just TIMED OUT until <t:{int(mktime(after.timeout.timetuple()))}:f>** \
-                        \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*"
-
-        # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
-        timeout_embed = nextcord.Embed(
-            title=f"Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
-            color=nextcord.Colour.from_rgb(255, 171, 246),
-            description=description,
+    # Ban watcher
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
+        ban_embed = discord.Embed(
+            title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
+            color=discord.Colour.from_rgb(255, 171, 246),
+            description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
         )
-        timeout_embed.set_thumbnail(url=after.display_avatar.url)
+        ban_embed.set_thumbnail(url=user.display_avatar.url)
 
-        admin_channel = dave.get_channel(admin_channel_id)
-        if isinstance(admin_channel, nextcord.TextChannel):
-            await admin_channel.send(embed=timeout_embed)
+        admin_channel = self.bot.get_channel(admin_channel_id)
+        if isinstance(admin_channel, discord.TextChannel):
+            await admin_channel.send(embed=ban_embed)
 
+    # Unban watcher
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild: discord.Guild, user: discord.Member):
+        unban_embed = discord.Embed(
+            title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
+            color=discord.Colour.from_rgb(255, 171, 246),
+            description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
+        )
+        unban_embed.set_thumbnail(url=user.display_avatar.url)
 
-@commands.Cog.listener()
-async def ban_watcher(guild, user):
-    ban_embed = nextcord.Embed(
-        title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
-        color=nextcord.Colour.from_rgb(255, 171, 246),
-        description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
-    )
-    ban_embed.set_thumbnail(url=user.display_avatar.url)
-
-    admin_channel = dave.get_channel(admin_channel_id)
-    if isinstance(admin_channel, nextcord.TextChannel):
-        await admin_channel.send(embed=ban_embed)
-
-
-@commands.Cog.listener()
-async def unban_watcher(guild, user):
-    unban_embed = nextcord.Embed(
-        title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
-        color=nextcord.Colour.from_rgb(255, 171, 246),
-        description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(mktime(datetime.datetime.now().timetuple()))}:f>*",
-    )
-    unban_embed.set_thumbnail(url=user.display_avatar.url)
-
-    admin_channel = dave.get_channel(admin_channel_id)
-    if isinstance(admin_channel, nextcord.TextChannel):
-        await admin_channel.send(embed=unban_embed)
+        admin_channel = self.bot.get_channel(admin_channel_id)
+        if isinstance(admin_channel, discord.TextChannel):
+            await admin_channel.send(embed=unban_embed)
 
 
-def setup(dave):
-    dave.add_listener(listeny, "on_message")
-    dave.add_listener(streamerboost, "on_presence_update")
-    dave.add_listener(timeout_watcher, "on_member_update")
-    dave.add_listener(ban_watcher, "on_member_ban")
-    dave.add_listener(unban_watcher, "on_member_unban")
-    dave.add_listener(on_ready, "on_ready")
+async def setup(bot):
+    print("Loading listeners extension..")
+    bot.add_listener(listeny, "on_message")
+    await bot.add_cog(StreamerBoost(bot))
+    await bot.add_cog(ModerationWatcher(bot))
