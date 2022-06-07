@@ -1,11 +1,11 @@
-import nextcord
-from nextcord.ext import commands
-from main import guild_ids
+from discord import app_commands
+from discord.ext import commands
 
 
 class ChoccyStock(commands.Cog):
-    def __init__(self, dave):
-        self.dave = dave
-    
-def setup(dave):
-    dave.add_cog(ChoccyStock(dave))
+    def __init__(self, bot):
+        self.bot = bot
+
+
+async def setup(bot):
+    await bot.add_cog(ChoccyStock(bot))
