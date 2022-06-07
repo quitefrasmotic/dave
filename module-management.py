@@ -7,11 +7,13 @@ class ModuleManagement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    extension_list = Literal[
+        "commands", "listeners", "moderation-watcher", "streamer-boost"
+    ]
+
     @app_commands.command(name="module-reload", description="Reload a Dave module")
     @app_commands.describe(extension="Specified module to reload")
-    async def reload_extension(
-        self, interaction, extension: Literal["commands", "listeners"]
-    ):
+    async def reload_extension(self, interaction, extension: extension_list):
         if interaction.user.id == 191634797897056265:
             print(f'Reloading extension "{extension}"..')
             await self.bot.reload_extension(extension)

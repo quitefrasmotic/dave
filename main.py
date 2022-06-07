@@ -21,6 +21,8 @@ class DaveBot(commands.Bot):
         await self.load_extension("commands")
         await self.load_extension("listeners")
         await self.load_extension("module-management")
+        await self.load_extension("moderation-watcher")
+        await self.load_extension("streamer-boost")
         # await self.load_extension("choccy-stock")
 
         self.tree.copy_global_to(guild=test_guild)
