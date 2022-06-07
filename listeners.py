@@ -117,12 +117,12 @@ class ModerationWatcher(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.is_timed_out() and not before.is_timed_out():
-            description = f"**{after.mention} was just TIMED OUT until <t:{int(after.timed_out_until.timestamp())}:f>** \
-                            \n*Occurred: <t:{int(time.time())}:f>*"
+            description = f"{after.mention} was just timed out until <t:{int(after.timed_out_until.timestamp())}:f> \
+                            \nOccurred <t:{int(time.time())}:f>"
 
             # If I want timestamp back, the precise way to provide it is "datetime.datetime.now(datetime.timezone.utc)"
             timeout_embed = discord.Embed(
-                title=f"Moderation Alert - TIME OUT - {after.name}#{after.discriminator}",
+                title=f"Moderation Alert: TIME OUT",
                 color=discord.Colour.from_rgb(255, 171, 246),
                 description=description,
             )
@@ -136,9 +136,9 @@ class ModerationWatcher(commands.Cog):
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
         ban_embed = discord.Embed(
-            title=f"Moderation Alert - BAN - {user.name}#{user.discriminator}",
+            title=f"Moderation Alert: BAN",
             color=discord.Colour.from_rgb(255, 171, 246),
-            description=f"**{user.mention} has been BANNED from the server** \n*Occurred: <t:{int(time.time())}:f>*",
+            description=f"{user.mention} has been banned from the server \nOccurred <t:{int(time.time())}:f>",
         )
         ban_embed.set_thumbnail(url=user.display_avatar.url)
 
@@ -150,9 +150,9 @@ class ModerationWatcher(commands.Cog):
     @commands.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.Member):
         unban_embed = discord.Embed(
-            title=f"Moderation Alert - UNBAN - {user.name}#{user.discriminator}",
+            title=f"Moderation Alert: UNBAN",
             color=discord.Colour.from_rgb(255, 171, 246),
-            description=f"**{user.mention} has been UNBANNED from the server** \n*Occurred: <t:{int(time.time())}:f>*",
+            description=f"{user.mention} has been unbanned from the server \nOccurred <t:{int(time.time())}:f>",
         )
         unban_embed.set_thumbnail(url=user.display_avatar.url)
 
