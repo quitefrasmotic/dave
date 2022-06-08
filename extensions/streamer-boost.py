@@ -29,9 +29,7 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in before.activities):
                     print("nevermind they were already streamin")
 
-                streamer_role = discord.Object(
-                    943381405801533471
-                )  # Stop hardcoding this - store in a better way
+                streamer_role = self.bot.get_cog("DataKeeper").get_prefs(after.guild.id, "streamer_role")
 
                 if streamer_role not in after.roles:
                     try:
@@ -54,7 +52,7 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in after.activities):
                     print("nevermind they still streamin")
 
-                streamer_role = discord.Object(943381405801533471)
+                streamer_role = self.bot.get_cog("DataKeeper").get_prefs(before.guild.id, "streamer_role")
 
                 if streamer_role in before.roles:
                     try:
@@ -69,36 +67,33 @@ class StreamerBoost(commands.Cog):
         await self.sanity()
 
     async def sanity(self):
-        # This is awful and I will endeavour to improve this ASAP
-        main_guild = ""
-        for i in range(len(self.bot.guilds)):
-            if self.bot.guilds[i].name == "repository of stuff":
-                main_guild = self.bot.guilds[i]
-        if main_guild == "":
-            raise SystemExit
+        datakeeper = self.bot.get_cog("DataKeeper")
+        guild_list = self.bot.guilds
 
-        streamer_role = main_guild.get_role(943381405801533471)
-
-        for m in range(len(main_guild.members)):
-            if any(
-                isinstance(i, discord.Streaming)
-                for i in main_guild.members[m].activities
-            ):
-                if streamer_role not in main_guild.members[m].roles:
-                    try:
-                        await main_guild.members[m].add_roles(
-                            streamer_role, reason="Member is streaming"
-                        )
-                    except discord.errors.Forbidden:
-                        print(role_forbidden_message)
-            else:
-                if streamer_role in main_guild.members[m].roles:
-                    try:
-                        await main_guild.members[m].remove_roles(
-                            streamer_role, reason="Member is not streaming"
-                        )
-                    except discord.errors.Forbidden:
-                        print(role_forbidden_message)
+        for g in range(len(guild_list)):
+            streamer_role_id = await datakeeper.get_prefs(guild_list[g].id, "streamer_role")
+            if streamer_role_id:
+                streamer_role = guild_list[g].get_role(int(streamer_role_id))
+                for m in range(len(guild_list[g].members)):
+                    if any(
+                        isinstance(i, discord.Streaming)
+                        for i in guild_list[g].members[m].activities
+                    ):
+                        if streamer_role not in guild_list[g].members[m].roles:
+                            try:
+                                await guild_list[g].members[m].add_roles(
+                                    streamer_role, reason="Member is streaming"
+                                )
+                            except discord.errors.Forbidden:
+                                print(role_forbidden_message)
+                    else:
+                        if streamer_role in guild_list[g].members[m].roles:
+                            try:
+                                await guild_list[g].members[m].remove_roles(
+                                    streamer_role, reason="Member is not streaming"
+                                )
+                            except discord.errors.Forbidden:
+                                print(role_forbidden_message)
 
 
 async def setup(bot):
