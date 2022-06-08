@@ -19,7 +19,7 @@ class DaveBot(commands.Bot):
 
     async def setup_hook(self):
         await self.load_extension("module-management")
-        await self.load_extension("database")
+        await self.load_extension("data-keeper")
         await self.load_extension("extensions.commands")
         await self.load_extension("extensions.listeners")
         await self.load_extension("extensions.moderation-watcher")
