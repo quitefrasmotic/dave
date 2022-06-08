@@ -1,9 +1,3 @@
-"""import sqlite3
-
-con = sqlite3.connect("database.db")
-cursor = con.cursor()
-
-if cursor.execute("")"""
 import discord
 import json
 
@@ -40,9 +34,9 @@ class DataKeeper(commands.Cog):
             json_data["data"]["guilds"].append(
                 {
                     "guild": str(interaction.guild_id),
-                    "streamer_role": str(streamer_role.id),
+                    "streamer_role": str(streamer_role.id), # Linter complains about this - will fix underlying cause
                 }
-            )  # Linter complains about this - will fix underlying cause
+            )
         else:
             for guild_element in json_data["data"]["guilds"]:
                 if guild_element["guild"] == str(interaction.guild_id):
@@ -69,12 +63,6 @@ class DataKeeper(commands.Cog):
                 result = guild_element[pref]
 
         return result
-        # [obj for obj in json_data["data"]["guilds"] if obj["guild"]==str(guild)][0][pref]
-        # match pref:
-        #    case "streamer_role":
-        #        return [obj for obj in json_data["data"]["guilds"] if obj["guild"]==guild][0]["streamer_role"]
-        #    case _:
-        #        raise Exception("Invalid pref input")
 
 
 async def setup(bot):
