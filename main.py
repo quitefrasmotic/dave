@@ -23,20 +23,34 @@ class DaveBot(commands.Bot):
         await self.load_extension("extensions.listeners")
         await self.load_extension("extensions.moderation-watcher")
         await self.load_extension("extensions.streamer-boost")
-        # await self.load_extension("choccy-stock")
 
-        self.tree.copy_global_to(guild=test_guild)
-        await self.tree.sync(guild=test_guild)
+        guild_object = discord.Object(guild)
+        self.tree.copy_global_to(guild=guild_object)
+        await self.tree.sync(guild=guild_object)
 
 
 load_dotenv()
+
+test_env = bool(os.getenv("TEST_ENV", ""))
+if not test_env:
+    print("Please clarify if this is a test environment in your .env!")
+    raise SystemExit
+
+guild_vars = ["MAIN_GUILD", "TEST_GUILD"]
+guild_ids = [os.getenv(i, "") for i in guild_vars]
+if not any(guild_ids):
+    print("Please provide guild IDs in your .env!")
+    raise SystemExit
+
+if test_env:
+    guild = guild_ids[1]
+else:
+    guild = guild_ids[0]
+
 with open("activitylinks", "r") as f:
     links = f.readlines()
     activity_link = random.choice(links)
     f.close()
-
-guild_ids = [583429823125258303, 915057672515108935]
-test_guild = discord.Object(guild_ids[1])
 
 command_prefix = ","
 intents = discord.Intents.all()
