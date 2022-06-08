@@ -37,11 +37,18 @@ class DataKeeper(commands.Cog):
                 in_array = True
 
         if not in_array:
-            json_data["data"]["guilds"].append({"guild": str(interaction.guild_id), "streamer_role": str(streamer_role.id)}) # Linter complains about this - will fix underlying cause
+            json_data["data"]["guilds"].append(
+                {
+                    "guild": str(interaction.guild_id),
+                    "streamer_role": str(streamer_role.id),
+                }
+            )  # Linter complains about this - will fix underlying cause
         else:
             for guild_element in json_data["data"]["guilds"]:
                 if guild_element["guild"] == str(interaction.guild_id):
-                    json_data["data"]["guilds"][guild_element]["streamer_role"] = str(streamer_role.id)
+                    json_data["data"]["guilds"][guild_element]["streamer_role"] = str(
+                        streamer_role.id
+                    )
 
         data.seek(0)
         data.write(json.dumps(json_data, indent=4, sort_keys=True))
@@ -49,7 +56,6 @@ class DataKeeper(commands.Cog):
         data.close()
 
         await interaction.response.send_message("Preference updated!")
-
 
     pref_list = Literal["streamer_role"]
 
