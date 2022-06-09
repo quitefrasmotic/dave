@@ -29,14 +29,15 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in before.activities):
                     print("nevermind they were already streamin")
 
-                streamer_role = self.bot.get_cog("DataKeeper").get_prefs(
+                streamer_role_id = await self.bot.get_cog("DataKeeper").get_prefs(
                     after.guild.id, "streamer_role"
                 )
+                streamer_role = after.guild.get_role(streamer_role_id)
 
                 if streamer_role not in after.roles:
                     try:
                         await after.add_roles(
-                            streamer_role, reason="Member started streaming"
+                            streamer_role, reason="Member started streaming"  # type: ignore
                         )
                     except discord.errors.Forbidden:
                         print(role_forbidden_message)
@@ -54,9 +55,10 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in after.activities):
                     print("nevermind they still streamin")
 
-                streamer_role = self.bot.get_cog("DataKeeper").get_prefs(
+                streamer_role_id = await self.bot.get_cog("DataKeeper").get_prefs(
                     before.guild.id, "streamer_role"
                 )
+                streamer_role = before.guild.get_role(streamer_role_id)
 
                 if streamer_role in before.roles:
                     try:
