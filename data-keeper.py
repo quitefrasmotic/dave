@@ -47,12 +47,12 @@ class DataKeeper(commands.Cog):
         # Check if guild is already in the data, update value if so
         in_array = None
         for guild in json_data["data"]["guilds"]:
-            if guild["guild"] == str(interaction.guild_id):
+            if guild["guild"] == interaction.guild_id:
                 if streamer_role:
-                    guild["streamer_role"] = str(streamer_role.id)
+                    guild["streamer_role"] = streamer_role.id
 
                 if admin_channel:
-                    guild["admin_channel"] = str(admin_channel.id)
+                    guild["admin_channel"] = admin_channel.id
 
                 in_array = True
 
@@ -60,9 +60,9 @@ class DataKeeper(commands.Cog):
         if not in_array:
             json_data["data"]["guilds"].append(
                 {
-                    "guild": str(interaction.guild_id),
-                    "streamer_role": str(streamer_role.id) if streamer_role else None,
-                    "admin_channel": str(admin_channel.id) if admin_channel else None,
+                    "guild": interaction.guild_id,
+                    "streamer_role": streamer_role.id if streamer_role else None,
+                    "admin_channel": admin_channel.id if admin_channel else None,
                 }
             )
 
@@ -82,7 +82,7 @@ class DataKeeper(commands.Cog):
 
         pref_values = []
         for i in range(len(pref_list_args)):
-            value = await self.get_prefs(interaction.guild_id, pref_list_args[i])
+            value = await self.get_prefs(interaction.guild_id, pref_list_args[i])  # type: ignore
             pref_values.append(f'"{pref_list_args[i]}": "{value}"')
 
         pref_values_string = "\n".join(pref_values)
@@ -99,7 +99,7 @@ class DataKeeper(commands.Cog):
 
         result = None
         for guild_element in json_data["data"]["guilds"]:
-            if guild_element["guild"] == str(guild):
+            if guild_element["guild"] == guild:
                 result = guild_element[pref]
 
         return result
