@@ -32,10 +32,7 @@ class DaveBot(commands.Bot):
 
 load_dotenv()
 
-test_env = bool(os.getenv("TEST_ENV", ""))
-if not test_env:
-    print("Please clarify if this is a test environment in your .env!")
-    raise SystemExit
+test_env = os.getenv("TEST_ENV", "false").lower() == "true"
 
 guild_vars = ["MAIN_GUILD", "TEST_GUILD"]
 guild_ids = [os.getenv(i, "") for i in guild_vars]
