@@ -1,7 +1,7 @@
 # Dave Prime
 ## A modern Discord bot for the squishypickle1 community
 
-This is the source for the specialised bot for [squishypickle1](https://www.twitch.tv/squishypickle1)'s community.
+This is the source for the specialised bot for Twitch streamer [squishypickle1](https://www.twitch.tv/squishypickle1)'s Discord server.
 Please excuse any mistakes - I'm fairly new to discord.py 2.0.0 still.
 
 ## Current features
