@@ -2,10 +2,9 @@ import discord
 import json
 import os.path
 
-from typing import Optional
-from typing import Literal
 from discord import app_commands
 from discord.ext import commands
+from typing import Optional, Literal, get_args
 
 
 class DataKeeper(commands.Cog):
@@ -75,7 +74,19 @@ class DataKeeper(commands.Cog):
 
         await interaction.response.send_message("Preferences updated!", ephemeral=True)
 
-    pref_list = Literal["streamer_role"]
+    @pref_cmd_group.command(
+        name="show", description="Show current Dave Prime preferences"
+    )
+    async def show_prefs(self, interaction: discord.Interaction):
+        pref_list_args = get_args(self.pref_list)
+
+        pref_values = []
+        for i in range(len(pref_list_args)):
+            value = await self.get_prefs(interaction.guild_id, pref_list_args[i])
+            pref_values.append(f'"{pref_list_args[i]}": "{value}"')
+
+        pref_values_string = "\n".join(pref_values)
+        await interaction.response.send_message(pref_values_string, ephemeral=True)
 
     async def get_prefs(self, guild: int, pref: pref_list):
         try:
