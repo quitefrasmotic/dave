@@ -1,11 +1,5 @@
 import discord
-import os
 from discord.ext import commands
-
-admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
-if not admin_channel_id:
-    print("Please provide an admin channel snowflake in your .env!")
-    raise SystemExit
 
 role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
 
@@ -82,11 +76,11 @@ class StreamerBoost(commands.Cog):
             )
             # Don't continue if couldn't get streamer role ID pref
             if not streamer_role_id:
-                print("Couldn't perform Streamerboost sanity check: couldn't get streamer role pref")
+                print("Couldn't get streamer role pref for Streamerboost sanity check")
                 return
 
             if streamer_role_id:
-                streamer_role = guild_list[g].get_role(int(streamer_role_id))
+                streamer_role = guild_list[g].get_role(streamer_role_id)
                 for m in range(len(guild_list[g].members)):
                     if any(
                         isinstance(i, discord.Streaming)
