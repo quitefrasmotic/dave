@@ -3,11 +3,6 @@ import time
 import os
 from discord.ext import commands
 
-admin_channel_id = int(os.getenv("ADMIN_CHANNEL", ""))
-if not admin_channel_id:
-    print("Please provide an admin channel snowflake in your .env!")
-    raise SystemExit
-
 
 class ModerationWatcher(commands.Cog):
     def __init__(self, bot):
@@ -30,6 +25,11 @@ class ModerationWatcher(commands.Cog):
             )
             timeout_embed.set_thumbnail(url=after.display_avatar.url)
 
+            datakeeper = self.bot.get_cog("DataKeeper")
+            admin_channel_id = await datakeeper.get_prefs(
+                after.guild.id, "admin_channel"
+            )
+
             admin_channel = self.bot.get_channel(admin_channel_id)
             if isinstance(admin_channel, discord.TextChannel):
                 await admin_channel.send(embed=timeout_embed)
@@ -44,6 +44,9 @@ class ModerationWatcher(commands.Cog):
         )
         ban_embed.set_thumbnail(url=user.display_avatar.url)
 
+        datakeeper = self.bot.get_cog("DataKeeper")
+        admin_channel_id = await datakeeper.get_prefs(guild.id, "admin_channel")
+
         admin_channel = self.bot.get_channel(admin_channel_id)
         if isinstance(admin_channel, discord.TextChannel):
             await admin_channel.send(embed=ban_embed)
@@ -57,6 +60,9 @@ class ModerationWatcher(commands.Cog):
             description=f"{user.mention} has been unbanned from the server \nOccurred <t:{int(time.time())}:f>",
         )
         unban_embed.set_thumbnail(url=user.display_avatar.url)
+
+        datakeeper = self.bot.get_cog("DataKeeper")
+        admin_channel_id = await datakeeper.get_prefs(guild.id, "admin_channel")
 
         admin_channel = self.bot.get_channel(admin_channel_id)
         if isinstance(admin_channel, discord.TextChannel):

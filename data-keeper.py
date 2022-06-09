@@ -12,7 +12,7 @@ class DataKeeper(commands.Cog):
         self.bot = bot
 
     pref_cmd_description = "Change Dave Prime preferences"
-    pref_list = Literal["streamer_role"]
+    pref_list = Literal["streamer_role", "admin_channel"]
     pref_option_description = [
         "This is the role the Streamerboost feature will give to members that are streaming",
         "This is the channel that Dave Prime will send moderation alerts",
