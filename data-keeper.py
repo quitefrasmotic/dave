@@ -72,7 +72,12 @@ class DataKeeper(commands.Cog):
         data.truncate()
         data.close()
 
-        await interaction.response.send_message("Preferences updated!", ephemeral=True)
+        if streamer_role or admin_channel:
+            response_message = "Preferences updated!"
+        else:
+            response_message = "Select an option to change a preference!"
+
+        await interaction.response.send_message(response_message, ephemeral=True)
 
     @pref_cmd_group.command(
         name="show", description="Show current Dave Prime preferences"
