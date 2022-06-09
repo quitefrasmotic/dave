@@ -78,6 +78,11 @@ class StreamerBoost(commands.Cog):
             streamer_role_id = await datakeeper.get_prefs(
                 guild_list[g].id, "streamer_role"
             )
+            # Don't continue if couldn't get streamer role ID pref
+            if not streamer_role_id:
+                print("Couldn't perform Streamerboost sanity check: couldn't get streamer role pref")
+                return
+
             if streamer_role_id:
                 streamer_role = guild_list[g].get_role(int(streamer_role_id))
                 for m in range(len(guild_list[g].members)):
