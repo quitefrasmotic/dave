@@ -11,7 +11,10 @@ class StreamerBoost(commands.Cog):
     @commands.Cog.listener()
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
         # If the member is now streaming
-        if any(isinstance(i, discord.Streaming) for i in after.activities):
+        if (
+            any(isinstance(i, discord.Streaming) for i in after.activities)
+            and not after.bot
+        ):
             streaming_before = any(
                 isinstance(i, discord.Streaming) for i in before.activities
             )
@@ -37,7 +40,10 @@ class StreamerBoost(commands.Cog):
                         print(role_forbidden_message)
 
         # If the member is no longer streaming
-        if any(isinstance(i, discord.Streaming) for i in before.activities):
+        if (
+            any(isinstance(i, discord.Streaming) for i in before.activities)
+            and not before.bot
+        ):
             streaming_after = any(
                 isinstance(i, discord.Streaming) for i in after.activities
             )
@@ -82,21 +88,19 @@ class StreamerBoost(commands.Cog):
             if streamer_role_id:
                 streamer_role = guild_list[g].get_role(streamer_role_id)
                 for m in range(len(guild_list[g].members)):
-                    if any(
-                        isinstance(i, discord.Streaming)
-                        for i in guild_list[g].members[m].activities
-                    ):
-                        if streamer_role not in guild_list[g].members[m].roles:
+                    member = guild_list[g].members[m]
+                    if any(isinstance(i, discord.Streaming) for i in member.activities):
+                        if streamer_role not in member.roles and not member.bot:
                             try:
-                                await guild_list[g].members[m].add_roles(
+                                await member.add_roles(
                                     streamer_role, reason="Member is streaming"
                                 )
                             except discord.errors.Forbidden:
                                 print(role_forbidden_message)
                     else:
-                        if streamer_role in guild_list[g].members[m].roles:
+                        if streamer_role in member.roles:
                             try:
-                                await guild_list[g].members[m].remove_roles(
+                                await member.remove_roles(
                                     streamer_role, reason="Member is not streaming"
                                 )
                             except discord.errors.Forbidden:

@@ -59,6 +59,7 @@ bot = DaveBot(command_prefix=command_prefix, intents=intents, activity=activity)
 
 @bot.event
 async def on_ready():
+    print("---------")
     print("Dave Prime activated")
     print(f"{bot.user} | {bot.application_id}\n")
 
