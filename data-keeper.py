@@ -88,7 +88,7 @@ class DataKeeper(commands.Cog):
         pref_values = []
         for i in range(len(pref_list_args)):
             value = await self.get_prefs(interaction.guild_id, pref_list_args[i])  # type: ignore
-            pref_values.append(f'"{pref_list_args[i]}": "{value}"')
+            pref_values.append(f'"{pref_list_args[i]}": {value}')
 
         pref_values_string = "\n".join(pref_values)
         await interaction.response.send_message(pref_values_string, ephemeral=True)
