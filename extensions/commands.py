@@ -160,6 +160,13 @@ class BasicCommands(commands.Cog):
         await self.send_gpt_stream(completion, message=target_message)
         await interaction.delete_original_response()
 
+    @app_commands.command(name="show-notes", description="Show developer notes")
+    async def character_profile(self, interaction: discord.Interaction):
+        file = open("notes.txt", "r")
+        content = "".join(file.readlines())
+        await interaction.response.send_message(content)
+
+
 async def setup(bot):
     print("Loading commands extension..")
     await bot.add_cog(BasicCommands(bot))
