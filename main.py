@@ -1,6 +1,7 @@
 import discord
 import os
 import random
+import openai
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -17,6 +18,8 @@ class DaveBot(commands.Bot):
             command_prefix=command_prefix, intents=intents, activity=activity
         )
 
+    gpt_timeout = False
+
     async def setup_hook(self):
         await self.load_extension("module-management")
         await self.load_extension("data-keeper")
@@ -25,6 +28,7 @@ class DaveBot(commands.Bot):
         await self.load_extension("extensions.moderation-watcher")
         await self.load_extension("extensions.streamer-boost")
 
+        openai.api_key = os.getenv("OPENAI_KEY")
 
 
 load_dotenv()
