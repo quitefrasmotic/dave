@@ -111,6 +111,10 @@ class BasicCommands(commands.Cog):
             interaction: discord.Interaction,
             member: discord.Member
     ):
+        if self.bot.gpt_timeout:
+            await interaction.response.send_message("try again in a couple seconds", ephemeral=True)
+            return
+
         prompt = [
             {"role": "system", "content": "You generate a short creative character backstory based on the name of the user, using an appropriate theme."},
             {"role": "system", "content": "The backstory includes a viscerally horrific, graphic, dark twist."},
@@ -128,6 +132,10 @@ class BasicCommands(commands.Cog):
             interaction: discord.Interaction,
             member: discord.Member = None
     ):
+        if self.bot.gpt_timeout:
+            await interaction.response.send_message("try again in a couple seconds", ephemeral=True)
+            return
+
         message_history = interaction.channel.history(limit=10)
         messages = [message async for message in message_history]
 
