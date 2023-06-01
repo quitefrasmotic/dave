@@ -122,6 +122,44 @@ class BasicCommands(commands.Cog):
         completion = await self.get_gpt_completion(prompt, streamer=True)
         await self.send_gpt_stream(completion, interaction)
 
+    @app_commands.command(name="berate", description="Berate a fool")
+    async def berate(
+            self,
+            interaction: discord.Interaction,
+            member: discord.Member = None
+    ):
+        message_history = interaction.channel.history(limit=10)
+        messages = [message async for message in message_history]
+
+        target_message = None
+        for message in messages:
+            if member is not None:
+                if message.author == member:
+                    target_message = message
+                    break
+            else:
+                if message.author != interaction.user:
+                    target_message = message
+                    break
+
+        if not target_message:
+            print("Couldn't find a message to berate!")
+            await interaction.response.send_message("try again but with someone who sent a message more recently", ephemeral=True)
+            return
+
+        prompt = [
+            {"role": "system", "content": "You are a character simulation that simulates a specified character."},
+            {"role": "system", "content": "This is an online chat between you and another user."},
+            {"role": "system", "content": "Act as if you are a Monty Python character."},
+            {"role": "system", "content": "Reply with a sarcastic, joking insult based on the other person's message."},
+            {"role": "user", "content": f"{target_message.author.display_name}: {target_message.content}"}
+        ]
+
+        await interaction.response.defer()
+        completion = await self.get_gpt_completion(prompt, streamer=True)
+        await self.send_gpt_stream(completion, message=target_message)
+        await interaction.delete_original_response()
+
 async def setup(bot):
     print("Loading commands extension..")
     await bot.add_cog(BasicCommands(bot))
