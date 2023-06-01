@@ -25,9 +25,6 @@ class DaveBot(commands.Bot):
         await self.load_extension("extensions.moderation-watcher")
         await self.load_extension("extensions.streamer-boost")
 
-        guild_object = discord.Object(guild)
-        self.tree.copy_global_to(guild=guild_object)
-        await self.tree.sync(guild=guild_object)
 
 
 load_dotenv()
@@ -44,6 +41,7 @@ if test_env:
     guild = guild_ids[1]
 else:
     guild = guild_ids[0]
+guild_object = discord.Object(guild)
 
 with open("activitylinks", "r") as f:
     links = f.readlines()
@@ -63,6 +61,20 @@ async def on_ready():
     print("Dave Prime activated")
     print(f"{bot.user} | {bot.application_id}\n")
 
+
+# Manual app command sync
+@bot.event
+async def on_message(ctx):
+    if str(ctx.content) == "DAVE sync" and ctx.author.id == 191634797897056265:
+        await ctx.channel.send("Syncing commands..")
+        try:
+            bot.tree.copy_global_to(guild=guild_object)
+            await bot.tree.sync(guild=guild_object)
+            await ctx.channel.send("Synced")
+        except discord.errors.HTTPException:
+            await ctx.channel.send("Failed to sync - probably reached daily limit")
+
+    await bot.process_commands(ctx)
 
 bot_token = str(os.getenv("BOT_TOKEN", ""))
 if bot_token:
