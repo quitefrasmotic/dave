@@ -151,8 +151,11 @@ class BasicCommands(commands.Cog):
                     break
 
         if not target_message:
-            print("Couldn't find a message to berate!")
             await interaction.response.send_message("try again but with someone who sent a message more recently", ephemeral=True)
+            return
+
+        if target_message.attachments:
+            await interaction.response.send_message("try again with a normal message", ephemeral=True)
             return
 
         prompt = [
@@ -163,7 +166,7 @@ class BasicCommands(commands.Cog):
             {"role": "user", "content": f"{target_message.author.display_name}: {target_message.content}"}
         ]
 
-        await interaction.response.defer()
+        await interaction.response.defer(thinking=True)
         completion = await self.get_gpt_completion(prompt, streamer=True)
         await self.send_gpt_stream(completion, message=target_message)
         await interaction.delete_original_response()
