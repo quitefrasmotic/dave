@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
 
-role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
-
 
 class StreamerBoost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    role_forbidden_message = "Bot doesn't have permission to update roles for this user! Maybe they're higher rank?"
 
     @commands.Cog.listener()
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
@@ -20,8 +20,8 @@ class StreamerBoost(commands.Cog):
             )
 
             if not streaming_before:
-                print(f"{after.name} is streaming")
-                print(f"before: {before.activities}\nafter: {after.activities}")
+                # print(f"{after.name} is streaming")
+                # print(f"before: {before.activities}\nafter: {after.activities}")
 
                 if any(isinstance(i, discord.Streaming) for i in before.activities):
                     print("nevermind they were already streamin")
@@ -34,10 +34,10 @@ class StreamerBoost(commands.Cog):
                 if streamer_role not in after.roles:
                     try:
                         await after.add_roles(
-                            streamer_role, reason="Member started streaming"  # type: ignore
+                            streamer_role, reason="Member started streaming"
                         )
                     except discord.errors.Forbidden:
-                        print(role_forbidden_message)
+                        print(self.role_forbidden_message)
 
         # If the member is no longer streaming
         if (
@@ -49,8 +49,8 @@ class StreamerBoost(commands.Cog):
             )
 
             if not streaming_after:
-                print(f"{before.name} is no longer streaming")
-                print(f"before: {before.activities}\nafter: {after.activities}")
+                # print(f"{before.name} is no longer streaming")
+                # print(f"before: {before.activities}\nafter: {after.activities}")
 
                 if any(isinstance(i, discord.Streaming) for i in after.activities):
                     print("nevermind they still streamin")
@@ -66,7 +66,7 @@ class StreamerBoost(commands.Cog):
                             streamer_role, reason="Member stopped streaming"
                         )
                     except discord.errors.Forbidden:
-                        print(role_forbidden_message)
+                        print(self.role_forbidden_message)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -96,7 +96,7 @@ class StreamerBoost(commands.Cog):
                                     streamer_role, reason="Member is streaming"
                                 )
                             except discord.errors.Forbidden:
-                                print(role_forbidden_message)
+                                print(self.role_forbidden_message)
                     else:
                         if streamer_role in member.roles:
                             try:
@@ -104,7 +104,7 @@ class StreamerBoost(commands.Cog):
                                     streamer_role, reason="Member is not streaming"
                                 )
                             except discord.errors.Forbidden:
-                                print(role_forbidden_message)
+                                print(self.role_forbidden_message)
 
 
 async def setup(bot):
