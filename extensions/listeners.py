@@ -1,5 +1,7 @@
 import asyncio
 import openai
+import discord
+import datetime
 
 from discord.ext import commands
 
@@ -7,6 +9,8 @@ from discord.ext import commands
 class BasicListeners(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    listening = None
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
@@ -33,6 +37,19 @@ class BasicListeners(commands.Cog):
             await ctx.reply(completion_content)
             await asyncio.sleep(2)
             self.bot.gpt_timeout = False
+
+        if self.listening == ctx.author.id:
+            file = open("notes.txt", "a")
+            file.write(f"{ctx.content}\n\n")
+            file.close()
+            self.listening = None
+            async with ctx.channel.typing():
+                sleep_until = datetime.datetime.now() + datetime.timedelta(seconds=2)
+                await discord.utils.sleep_until(sleep_until)
+                await ctx.channel.send("alright i got you")
+
+        if ctx.content == "DAVE listen up" and not ctx.author.bot:
+            self.listening = ctx.author.id
 
 
 async def setup(bot):
