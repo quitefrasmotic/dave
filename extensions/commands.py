@@ -1,4 +1,6 @@
 import discord
+import openai
+import asyncio
 from discord import app_commands
 from discord.ext import commands
 
@@ -7,8 +9,64 @@ class BasicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_gpt_completion(self, prompt, streamer: bool):
+        self.bot.gpt_timeout = True
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                temperature=1.0,
+                max_tokens=256,
+                stream=streamer,
+                messages=prompt
+            )
+
+        except openai.error.RateLimitError:
+            print("Ratelimited by OpenAI!")
+            return
+
+        return completion
+
+    async def send_gpt_stream(self, completion, interaction = None, message = None):
+        collected_messages = []
+        message_string = ""
+        iteration = 0
+        first_message = True
+        new_message = None
+
+        for chunk in completion:
+            chunk_message = chunk["choices"][0]["delta"]
+            finish_reason = chunk["choices"][0]["finish_reason"]
+
+            chunk_message_plain = chunk_message.to_dict().get("content")
+            if finish_reason == "stop":
+                iteration = 5
+
+            if chunk_message_plain is not None:
+                if first_message:
+                    if message is not None:
+                        new_message = await message.reply(chunk_message_plain)
+                    else:
+                        await interaction.response.send_message(chunk_message_plain)
+
+                    first_message = False
+
+                collected_messages.append(chunk_message_plain)
+                message_string = "".join(collected_messages)
+                iteration += 1
+
+            if iteration == 5:
+                if message is not None:
+                    await new_message.edit(content=message_string)
+                else:
+                    await interaction.edit_original_response(content=message_string)
+                await asyncio.sleep(1)
+                iteration = 0
+
+        await asyncio.sleep(2)
+        self.bot.gpt_timeout = False
+
     @app_commands.command(name="test-command", description="This is a test command")
-    async def testcommand(self, interaction: discord.Interaction):
+    async def test_command(self, interaction: discord.Interaction):
         await interaction.response.send_message("idiot")
 
     @app_commands.command(name="owo", description="owo-ify your message")
@@ -25,7 +83,7 @@ class BasicCommands(commands.Cog):
         if message:
             owo_payload = message
         else:
-            message_history = interaction.channel.history(limit=1)  # type: ignore
+            message_history = interaction.channel.history(limit=1)
             owo_payload = [message async for message in message_history][0]
 
             if not owo_payload.content:  # Maybe add owo_payload.author.bot too
@@ -42,11 +100,27 @@ class BasicCommands(commands.Cog):
                 owo_payload = owo_payload.replace(i, "W")
 
         if anonymous:
-            await interaction.channel.send(owo_payload)  # type: ignore
+            await interaction.channel.send(owo_payload)
             await interaction.response.send_message("Message sent!", ephemeral=True)
         else:
             await interaction.response.send_message(owo_payload)
 
+    @app_commands.command(name="backstory", description="Create your very own character profile")
+    async def backstory(
+            self,
+            interaction: discord.Interaction,
+            member: discord.Member
+    ):
+        prompt = [
+            {"role": "system", "content": "You generate a short creative character backstory based on the name of the user, using an appropriate theme."},
+            {"role": "system", "content": "The backstory includes a viscerally horrific, graphic, dark twist."},
+            {"role": "system", "content": "The backstory is shorter than 200 words."},
+            {"role": "system", "content": "The generation only contains the backstory, no prefix."},
+            {"role": "system", "content": f"Name: {member.display_name}"}
+        ]
+
+        completion = await self.get_gpt_completion(prompt, streamer=True)
+        await self.send_gpt_stream(completion, interaction)
 
 async def setup(bot):
     print("Loading commands extension..")
