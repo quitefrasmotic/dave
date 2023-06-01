@@ -2,6 +2,7 @@
 ## A modern Discord bot for the Nekomeowncer community
 
 This is a specialised bot for Twitch streamer (and friend) [TheNekomeowncer](https://www.twitch.tv/thenekomeowncer)'s Discord server.
+
 It's just a personal project for fun so don't look into it too much!
 
 ## Current features
