@@ -54,11 +54,11 @@ with open("activitylinks", "r") as f:
     activity_link = random.choice(links)
     f.close()
 
-command_prefix = ","
-intents = discord.Intents.all()
-activity = discord.Streaming(name="the singularity", url=activity_link)
-
-bot = DaveBot(command_prefix=command_prefix, intents=intents, activity=activity)
+bot = DaveBot(
+    command_prefix=",",
+    intents=discord.Intents.all(),  # Need to stop using all intents, pick what I actually need
+    activity=discord.Streaming(name="the Singularity", url=activity_link)
+)
 
 
 @bot.event
