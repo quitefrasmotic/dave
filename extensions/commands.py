@@ -1,5 +1,4 @@
 import discord
-import openai
 import asyncio
 from discord import app_commands
 from discord.ext import commands
@@ -11,8 +10,9 @@ class BasicCommands(commands.Cog):
 
     async def get_gpt_completion(self, prompt, streamer: bool):
         self.bot.gpt_timeout = True
+        gpt_client = self.bot.gpt_client
         try:
-            completion = openai.ChatCompletion.create(
+            completion = gpt_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 temperature=1.0,
                 max_tokens=256,
@@ -20,50 +20,55 @@ class BasicCommands(commands.Cog):
                 messages=prompt
             )
 
-        except openai.error.RateLimitError:
+        except gpt_client.error.RateLimitError:
             print("Ratelimited by OpenAI!")
             return
 
         return completion
 
-    async def send_gpt_stream(self, completion, interaction = None, message = None):
+    async def send_gpt_stream(self, completion, interaction=None, message=None):
         collected_messages = []
         message_string = ""
         iteration = 0
         first_message = True
         new_message = None
+        edit_size = 20
 
+        # This is a mess and needs to be rewritten in a simpler way
         for chunk in completion:
-            chunk_message = chunk["choices"][0]["delta"]
-            finish_reason = chunk["choices"][0]["finish_reason"]
+            if str(chunk.choices[0].delta.content) != "":
+                chunk_message = chunk.choices[0].delta
+                finish_reason = chunk.choices[0].finish_reason
 
-            chunk_message_plain = chunk_message.to_dict().get("content")
-            if finish_reason == "stop":
-                iteration = 5
+                chunk_message_plain = chunk_message.content
+                if finish_reason == "stop":
+                    iteration = edit_size
 
-            if chunk_message_plain is not None:
-                if first_message:
+                if chunk_message_plain is not None:
+                    if first_message:
+                        if message is not None:
+                            new_message = await message.reply(chunk_message_plain)
+                        else:
+                            await interaction.response.send_message(chunk.choices[0].delta.content)
+
+                        first_message = False
+
+                    collected_messages.append(chunk_message_plain)
+                    message_string = "".join(collected_messages)
+                    iteration += 1
+
+                if iteration == edit_size:
                     if message is not None:
-                        new_message = await message.reply(chunk_message_plain)
+                        await new_message.edit(content=message_string)
                     else:
-                        await interaction.response.send_message(chunk_message_plain)
+                        await interaction.edit_original_response(content=message_string)
+                    await asyncio.sleep(1)
+                    iteration = 0
 
-                    first_message = False
 
-                collected_messages.append(chunk_message_plain)
-                message_string = "".join(collected_messages)
-                iteration += 1
-
-            if iteration == 5:
-                if message is not None:
-                    await new_message.edit(content=message_string)
-                else:
-                    await interaction.edit_original_response(content=message_string)
-                await asyncio.sleep(1)
-                iteration = 0
-
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         self.bot.gpt_timeout = False
+        return message_string
 
     @app_commands.command(name="test-command", description="This is a test command")
     async def test_command(self, interaction: discord.Interaction):

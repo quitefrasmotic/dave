@@ -1,10 +1,12 @@
 import discord
 import os
 import random
-import openai
 
 from discord.ext import commands
+from openai import OpenAI
 from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class DaveBot(commands.Bot):
@@ -18,6 +20,9 @@ class DaveBot(commands.Bot):
             command_prefix=command_prefix, intents=intents, activity=activity
         )
 
+    gpt_client = OpenAI(
+        api_key=str(os.getenv("OPENAI_KEY"))
+    )
     gpt_timeout = False
 
     async def setup_hook(self):
@@ -28,13 +33,9 @@ class DaveBot(commands.Bot):
         await self.load_extension("extensions.moderation-watcher")
         await self.load_extension("extensions.streamer-boost")
 
-        openai.api_key = os.getenv("OPENAI_KEY")
 
-
-load_dotenv()
-
+# TODO: Make sure these variables are actually set, they seemed to silently be None sometimes
 test_env = os.getenv("TEST_ENV", "false").lower() == "true"
-
 guild_vars = ["MAIN_GUILD", "TEST_GUILD"]
 guild_ids = [os.getenv(i, "") for i in guild_vars]
 if not any(guild_ids):
@@ -43,6 +44,7 @@ if not any(guild_ids):
 
 if test_env:
     guild = guild_ids[1]
+    print("Bot is running in test guild")
 else:
     guild = guild_ids[0]
 guild_object = discord.Object(guild)
