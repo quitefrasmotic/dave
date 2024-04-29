@@ -72,7 +72,7 @@ class BasicCommands(commands.Cog):
 
     @app_commands.command(name="test-command", description="This is a test command")
     async def test_command(self, interaction: discord.Interaction):
-        await interaction.response.send_message("idiot")
+        await interaction.followup.send("idiot")
 
     @app_commands.command(name="owo", description="owo-ify your message")
     @app_commands.describe(
@@ -92,7 +92,7 @@ class BasicCommands(commands.Cog):
             owo_payload = [message async for message in message_history][0]
 
             if not owo_payload.content:  # Maybe add owo_payload.author.bot too
-                await interaction.response.send_message("try again, idiot")
+                await interaction.followup.send("try again, idiot")
                 return
             else:
                 owo_payload = owo_payload.content
@@ -106,9 +106,9 @@ class BasicCommands(commands.Cog):
 
         if anonymous:
             await interaction.channel.send(owo_payload)
-            await interaction.response.send_message("Message sent!", ephemeral=True)
+            await interaction.followup.send("Message sent!", ephemeral=True)
         else:
-            await interaction.response.send_message(owo_payload)
+            await interaction.followup.send(owo_payload)
 
     @app_commands.command(name="backstory", description="Create your very own character profile")
     async def backstory(
@@ -117,7 +117,7 @@ class BasicCommands(commands.Cog):
             member: discord.Member
     ):
         if self.bot.gpt_timeout:
-            await interaction.response.send_message("try again in a couple seconds", ephemeral=True)
+            await interaction.followup.send("try again in a couple seconds", ephemeral=True)
             return
 
         prompt = [
@@ -138,7 +138,7 @@ class BasicCommands(commands.Cog):
             member: discord.Member = None
     ):
         if self.bot.gpt_timeout:
-            await interaction.response.send_message("try again in a couple seconds", ephemeral=True)
+            await interaction.followup.send("try again in a couple seconds", ephemeral=True)
             return
 
         message_history = interaction.channel.history(limit=10)
@@ -156,11 +156,11 @@ class BasicCommands(commands.Cog):
                     break
 
         if not target_message:
-            await interaction.response.send_message("try again but with someone who sent a message more recently", ephemeral=True)
+            await interaction.followup.send("try again but with someone who sent a message more recently", ephemeral=True)
             return
 
         if target_message.attachments:
-            await interaction.response.send_message("try again with a normal message", ephemeral=True)
+            await interaction.followup.send("try again with a normal message", ephemeral=True)
             return
 
         prompt = [
@@ -180,7 +180,7 @@ class BasicCommands(commands.Cog):
     async def show_notes(self, interaction: discord.Interaction):
         file = open("notes.txt", "r")
         content = "".join(file.readlines())
-        await interaction.response.send_message(content)
+        await interaction.followup.send(content)
 
 
 async def setup(bot):
