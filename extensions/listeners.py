@@ -13,7 +13,7 @@ class BasicListeners(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if str(ctx.content) == "hey" and not ctx.author.bot and not self.bot.gpt_timeout:
+        if str(ctx.content).lower() == "hey" and not ctx.author.bot and not self.bot.gpt_timeout:
             self.bot.gpt_timeout = True
             gpt_client = self.bot.gpt_client
             async with ctx.channel.typing():
