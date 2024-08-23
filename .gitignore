@@ -1,5 +1,6 @@
 # Project-specific
 /data.json
+/notes.txt
 
 # VSCode
 /.vscode/settings.json
