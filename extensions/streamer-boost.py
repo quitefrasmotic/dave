@@ -26,9 +26,8 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in before.activities):
                     print("nevermind they were already streamin")
 
-                streamer_role_id = await self.bot.get_cog("DataKeeper").get_guild_data(
-                    after.guild.id, "streamer_role"
-                )
+                streamer_role_id_string = await self.bot.get_cog("DataKeeper").get_guild_data(str(after.guild.id), "streamer_role")
+                streamer_role_id = int(streamer_role_id_string)
                 streamer_role = after.guild.get_role(streamer_role_id)
 
                 if streamer_role not in after.roles:
@@ -55,9 +54,8 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in after.activities):
                     print("nevermind they still streamin")
 
-                streamer_role_id = await self.bot.get_cog("DataKeeper").get_guild_data(
-                    before.guild.id, "streamer_role"
-                )
+                streamer_role_id_string = await self.bot.get_cog("DataKeeper").get_guild_data(str(before.guild.id), "streamer_role")
+                streamer_role_id = int(streamer_role_id_string)
                 streamer_role = before.guild.get_role(streamer_role_id)
 
                 if streamer_role in before.roles:
@@ -77,13 +75,13 @@ class StreamerBoost(commands.Cog):
         guild_list = self.bot.guilds
 
         for g in range(len(guild_list)):
-            streamer_role_id = await datakeeper.get_guild_data(
-                guild_list[g].id, "streamer_role"
-            )
+            streamer_role_id_string = await datakeeper.get_guild_data(str(guild_list[g].id), "streamer_role")
             # Don't continue if couldn't get streamer role ID pref
-            if not streamer_role_id:
+            if not streamer_role_id_string:
                 print("Couldn't get streamer role pref for Streamerboost sanity check")
                 return
+
+            streamer_role_id = int(streamer_role_id_string)
 
             if streamer_role_id:
                 streamer_role = guild_list[g].get_role(streamer_role_id)
