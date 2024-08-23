@@ -1,7 +1,13 @@
+import base64
+import io
+import os
+
 import discord
 import asyncio
 from discord import app_commands
 from discord.ext import commands
+from openai import BadRequestError
+from openai import AsyncOpenAI
 
 
 class BasicCommands(commands.Cog):
@@ -121,15 +127,44 @@ class BasicCommands(commands.Cog):
             return
 
         prompt = [
-            {"role": "system", "content": "You generate a short creative character backstory based on the name of the user, using an appropriate theme."},
-            {"role": "system", "content": "The backstory includes a viscerally horrific, graphic, dark twist."},
+            {"role": "system", "content": "You generate a short creative character backstory based on the name of the user, using a theme fitting of the name."},
+            {"role": "system", "content": "The backstory includes an extremely unexpected twist."},
             {"role": "system", "content": "The backstory is shorter than 200 words."},
             {"role": "system", "content": "The generation only contains the backstory, no prefix."},
-            {"role": "system", "content": f"Name: {member.display_name}"}
+            {"role": "user", "content": f"User's name: {member.display_name}"}
         ]
 
         completion = await self.get_gpt_completion(prompt, streamer=True)
-        await self.send_gpt_stream(completion, interaction)
+        full_completion = await self.send_gpt_stream(completion, interaction)
+
+        print("Generating image")
+        async_gpt_client = AsyncOpenAI(api_key=str(os.getenv("OPENAI_KEY")))
+
+        imageprompt = "Convert this story into a short, single paragraph image generation prompt that will create a still frame from a Roger Deakins movie: "+full_completion
+        new_prompt = await async_gpt_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role":"user", "content": imageprompt}]
+        )
+
+        print(str(new_prompt.choices[0].message.content))
+
+        image = None
+        try:
+            image = await async_gpt_client.images.generate(
+                model="dall-e-3",
+                prompt=str(new_prompt.choices[0].message.content),
+                n=1,
+                size="1792x1024",
+                response_format="b64_json",
+                quality="standard",
+                style="natural"
+            )
+        except BadRequestError:
+            await interaction.followup.send("openai was offended by your story", ephemeral=True)
+
+        print("Sending image")
+        file = discord.File(io.BytesIO(base64.b64decode(image.data[0].b64_json)), "image.png")
+        await interaction.followup.send(file=file)
 
     @app_commands.command(name="berate", description="Berate a fool")
     async def berate(
@@ -171,7 +206,7 @@ class BasicCommands(commands.Cog):
             {"role": "user", "content": f"{target_message.author.display_name}: {target_message.content}"}
         ]
 
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True, ephemeral=True)
         completion = await self.get_gpt_completion(prompt, streamer=True)
         await self.send_gpt_stream(completion, message=target_message)
         await interaction.delete_original_response()
