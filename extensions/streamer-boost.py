@@ -26,7 +26,7 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in before.activities):
                     print("nevermind they were already streamin")
 
-                streamer_role_id = await self.bot.get_cog("DataKeeper").get_prefs(
+                streamer_role_id = await self.bot.get_cog("DataKeeper").get_guild_data(
                     after.guild.id, "streamer_role"
                 )
                 streamer_role = after.guild.get_role(streamer_role_id)
@@ -55,7 +55,7 @@ class StreamerBoost(commands.Cog):
                 if any(isinstance(i, discord.Streaming) for i in after.activities):
                     print("nevermind they still streamin")
 
-                streamer_role_id = await self.bot.get_cog("DataKeeper").get_prefs(
+                streamer_role_id = await self.bot.get_cog("DataKeeper").get_guild_data(
                     before.guild.id, "streamer_role"
                 )
                 streamer_role = before.guild.get_role(streamer_role_id)
@@ -77,7 +77,7 @@ class StreamerBoost(commands.Cog):
         guild_list = self.bot.guilds
 
         for g in range(len(guild_list)):
-            streamer_role_id = await datakeeper.get_prefs(
+            streamer_role_id = await datakeeper.get_guild_data(
                 guild_list[g].id, "streamer_role"
             )
             # Don't continue if couldn't get streamer role ID pref

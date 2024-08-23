@@ -7,72 +7,42 @@ from discord.ext import commands
 from typing import Optional, Literal, get_args
 
 
+# This is now less dumb, but still really needs to be replaced with an actual database
 class DataKeeper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    pref_cmd_description = "Change Dave Prime preferences"
-    pref_list = Literal["streamer_role", "admin_channel"]
-    pref_option_description = [
-        "This is the role the Streamerboost feature will give to members that are streaming",
-        "This is the channel that Dave Prime will send moderation alerts",
-    ]
+    guild_keys = Literal["streamer_role", "admin_channel"]
+    member_keys = Literal["temp"]
+
     pref_cmd_group = app_commands.Group(
         name="preferences", description="Set your Dave Prime preferences"
     )
     # preferences_group_show = app_commands.Group(name="show", description="Show your current Dave Prime preferences", parent=preferences_group)
 
-    @pref_cmd_group.command(name="set", description=pref_cmd_description)
+    @pref_cmd_group.command(name="set", description="Change Dave Prime preferences")
     @app_commands.describe(
-        streamer_role=pref_option_description[0],
-        admin_channel=pref_option_description[1],
+        streamer_role="This is the role the Streamerboost feature will give to members that are streaming",
+        admin_channel="This is the channel that Dave Prime will send moderation alerts",
     )
     @app_commands.rename(
         streamer_role="streamer-boost-role", admin_channel="admin-channel"
     )
-    async def save_prefs(
+    async def set_guild_pref(
         self,
         interaction: discord.Interaction,
         streamer_role: Optional[discord.Role],
         admin_channel: Optional[discord.TextChannel],
     ):
-        # Check if data file exists, if not create new one and generate basic json structure
-        if os.path.isfile("data.json"):
-            data = open("data.json", "r+")
-            json_data = json.load(data)
-        else:
-            data = open("data.json", "w+")
-            json_data = {"data": {"guilds": []}}
+        prefs_changed = False
+        if streamer_role:
+            await self.set_guild_data(str(interaction.guild_id), "streamer_role", str(streamer_role.id))
+            prefs_changed = True
+        if admin_channel:
+            await self.set_guild_data(str(interaction.guild_id), "admin_channel", str(admin_channel.id))
+            prefs_changed = True
 
-        # Check if guild is already in the data, update value if so
-        in_array = None
-        for guild in json_data["data"]["guilds"]:
-            if guild["guild"] == interaction.guild_id:
-                if streamer_role:
-                    guild["streamer_role"] = streamer_role.id
-
-                if admin_channel:
-                    guild["admin_channel"] = admin_channel.id
-
-                in_array = True
-
-        # If guild isn't in data, add new entry into guild array with values
-        if not in_array:
-            json_data["data"]["guilds"].append(
-                {
-                    "guild": interaction.guild_id,
-                    "streamer_role": streamer_role.id if streamer_role else None,
-                    "admin_channel": admin_channel.id if admin_channel else None,
-                }
-            )
-
-        # Go to beginning of file and truncate to overwrite file to avoid opening file twice with different modes
-        data.seek(0)
-        data.write(json.dumps(json_data, indent=4, sort_keys=True))
-        data.truncate()
-        data.close()
-
-        if streamer_role or admin_channel:
+        if prefs_changed:
             response_message = "Preferences updated!"
         else:
             response_message = "Select an option to change a preference!"
@@ -82,32 +52,107 @@ class DataKeeper(commands.Cog):
     @pref_cmd_group.command(
         name="show", description="Show current Dave Prime preferences"
     )
-    async def show_prefs(self, interaction: discord.Interaction):
-        pref_list_args = get_args(self.pref_list)
+    async def show_guild_pref(self, interaction: discord.Interaction):
+        #fix this to get all keys with new method
+        prefs = await self.get_guild_data(str(interaction.guild_id), "admin_channel")
+        prefs.pop("members", None)
 
-        pref_values = []
-        for i in range(len(pref_list_args)):
-            value = await self.get_prefs(interaction.guild_id, pref_list_args[i])  # type: ignore
-            pref_values.append(f'"{pref_list_args[i]}": {value}')
+        await interaction.response.send_message(prefs, ephemeral=True)
 
-        pref_values_string = "\n".join(pref_values)
-        await interaction.response.send_message(pref_values_string, ephemeral=True)
+    async def load_data(self):
+        # Check if data file exists, if not create new one and generate basic json structure
+        if os.path.isfile("data.json"):
+            data = open("data.json", "r+")
+            json_data = json.load(data)
+        else:
+            data = open("data.json", "w+")
+            json_data = {
+                "data": {
+                    "guilds": []
+                }
+            }
+        return data, json_data
 
-    async def get_prefs(self, guild: int, pref: pref_list):
-        try:
-            data = open("data.json", "r")
-        except FileNotFoundError:
-            print("Data file not found!")
-            return None
+    async def initialise_guild(self, json_data, guild: str):
+        in_list = None
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                print("in list")
+                in_list = True
 
-        json_data = json.load(data)
+        if not in_list:
+            json_data["data"]["guilds"].append(
+                {
+                    "guild": guild,
+                    "members": []
+                }
+            )
+        return json_data
 
-        result = None
-        for guild_element in json_data["data"]["guilds"]:
-            if guild_element["guild"] == guild:
-                result = guild_element[pref]
+    async def write_data(self, data, json_data):
+        # Go to beginning of file and truncate to overwrite file to avoid opening file twice with different modes
+        data.seek(0)
+        data.write(json.dumps(json_data, indent=4))
+        data.truncate()
+        data.close()
 
-        return result
+    async def set_guild_data(self, guild: str, key: guild_keys, value: str):
+        data, json_data = await self.load_data()
+
+        json_data = await self.initialise_guild(json_data, guild)
+
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                i[key] = value
+
+        await self.write_data(data, json_data)
+
+    async def set_member_data(self, guild: str, user: str, key: member_keys, value: str):
+        data, json_data = await self.load_data()
+
+        json_data = await self.initialise_guild(json_data, guild)
+
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                member_exists = None
+                for j in i["members"]:
+                    if j["member"] == user:
+                        j[key] = value
+                        member_exists = True
+
+                if not member_exists:
+                    i["members"].append({"member": user, key: value})
+
+        await self.write_data(data, json_data)
+
+    '''async def get_guild_data(self, guild: str):
+        data, json_data = await self.load_data()
+
+        prefs = None
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                prefs = i
+        return prefs'''
+
+    async def get_guild_data(self, guild: str, key: guild_keys):
+        data, json_data = await self.load_data()
+
+        value = None
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                value = i[key]
+        return value
+
+    async def get_member_data(self, guild: str, user: str, key: member_keys):
+        data, json_data = await self.load_data()
+
+        value = None
+        for i in json_data["data"]["guilds"]:
+            if i["guild"] == guild:
+                for j in i["members"]:
+                    if j["member"] == user:
+                        value = j[key]
+        return value
 
 
 async def setup(bot):

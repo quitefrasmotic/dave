@@ -3,8 +3,7 @@ import time
 import os
 from discord.ext import commands
 
-
-class ModerationWatcher(commands.Cog):
+class Watchcat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -26,9 +25,7 @@ class ModerationWatcher(commands.Cog):
             timeout_embed.set_thumbnail(url=after.display_avatar.url)
 
             datakeeper = self.bot.get_cog("DataKeeper")
-            admin_channel_id = await datakeeper.get_prefs(
-                after.guild.id, "admin_channel"
-            )
+            admin_channel_id = await datakeeper.get_guild_data(after.guild.id, "admin_channel")
 
             admin_channel = self.bot.get_channel(admin_channel_id)
             if isinstance(admin_channel, discord.TextChannel):
@@ -45,7 +42,7 @@ class ModerationWatcher(commands.Cog):
         ban_embed.set_thumbnail(url=user.display_avatar.url)
 
         datakeeper = self.bot.get_cog("DataKeeper")
-        admin_channel_id = await datakeeper.get_prefs(guild.id, "admin_channel")
+        admin_channel_id = await datakeeper.get_guild_data(guild.id, "admin_channel")
 
         admin_channel = self.bot.get_channel(admin_channel_id)
         if isinstance(admin_channel, discord.TextChannel):
@@ -62,7 +59,7 @@ class ModerationWatcher(commands.Cog):
         unban_embed.set_thumbnail(url=user.display_avatar.url)
 
         datakeeper = self.bot.get_cog("DataKeeper")
-        admin_channel_id = await datakeeper.get_prefs(guild.id, "admin_channel")
+        admin_channel_id = await datakeeper.get_guild_data(guild.id, "admin_channel")
 
         admin_channel = self.bot.get_channel(admin_channel_id)
         if isinstance(admin_channel, discord.TextChannel):
@@ -71,4 +68,4 @@ class ModerationWatcher(commands.Cog):
 
 async def setup(bot):
     print("Loading moderation watcher extension..")
-    await bot.add_cog(ModerationWatcher(bot))
+    await bot.add_cog(Watchcat(bot))

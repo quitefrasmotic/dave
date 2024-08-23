@@ -126,6 +126,7 @@ class BasicCommands(commands.Cog):
             await interaction.followup.send("try again in a couple seconds", ephemeral=True)
             return
 
+        # TODO: Clean this new image gen code up to standards
         prompt = [
             {"role": "system", "content": "You generate a short creative character backstory based on the name of the user, using a theme fitting of the name."},
             {"role": "system", "content": "The backstory includes an extremely unexpected twist."},
