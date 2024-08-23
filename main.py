@@ -30,7 +30,7 @@ class DaveBot(commands.Bot):
         await self.load_extension("data-keeper")
         await self.load_extension("extensions.commands")
         await self.load_extension("extensions.listeners")
-        await self.load_extension("extensions.moderation-watcher")
+        await self.load_extension("extensions.watchcat")
         await self.load_extension("extensions.streamer-boost")
 
 
