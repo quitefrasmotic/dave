@@ -71,13 +71,15 @@ class DataKeeper(commands.Cog):
                     "guilds": []
                 }
             }
+            data.seek(0)
+            data.write(json.dumps(json_data, indent=4))
+            data.truncate()
         return data, json_data
 
     async def initialise_guild(self, json_data, guild: str):
         in_list = None
         for i in json_data["data"]["guilds"]:
             if i["guild"] == guild:
-                print("in list")
                 in_list = True
 
         if not in_list:
@@ -136,6 +138,7 @@ class DataKeeper(commands.Cog):
 
     async def get_guild_data(self, guild: str, key: guild_keys):
         data, json_data = await self.load_data()
+        data.close()
 
         value = None
         for i in json_data["data"]["guilds"]:
@@ -145,6 +148,7 @@ class DataKeeper(commands.Cog):
 
     async def get_member_data(self, guild: str, user: str, key: member_keys):
         data, json_data = await self.load_data()
+        data.close()
 
         value = None
         for i in json_data["data"]["guilds"]:
