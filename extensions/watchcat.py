@@ -25,7 +25,7 @@ class Watchcat(commands.Cog):
             timeout_embed.set_thumbnail(url=after.display_avatar.url)
 
             datakeeper = self.bot.get_cog("DataKeeper")
-            admin_channel_id = await datakeeper.get_guild_data(after.guild.id, "admin_channel")
+            admin_channel_id = int(await datakeeper.get_guild_data(str(after.guild.id), "admin_channel"))
 
             admin_channel = self.bot.get_channel(admin_channel_id)
             if isinstance(admin_channel, discord.TextChannel):
@@ -42,7 +42,7 @@ class Watchcat(commands.Cog):
         ban_embed.set_thumbnail(url=user.display_avatar.url)
 
         datakeeper = self.bot.get_cog("DataKeeper")
-        admin_channel_id = await datakeeper.get_guild_data(guild.id, "admin_channel")
+        admin_channel_id = int(await datakeeper.get_guild_data(str(guild.id), "admin_channel"))
 
         admin_channel = self.bot.get_channel(admin_channel_id)
         if isinstance(admin_channel, discord.TextChannel):
